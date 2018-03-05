@@ -233,7 +233,7 @@ consensus and community norms, not impose more structure than necessary.
 [License]: #license
 
 This repository is licensed under Apache License, Version 2.0,
-([LICENSE-APACHE](LICENSE-APACHE) or
+([LICENSE](LICENSE) or
 http://www.apache.org/licenses/LICENSE-2.0)
 
 
