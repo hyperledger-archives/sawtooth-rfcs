@@ -9,9 +9,9 @@ bit of a design process and produce a consensus among the Sawtooth community and
 the [sub-team]s.
 
 The "RFC" (request for comments) process is intended to provide a consistent
-and controlled path for new features to enter the language and standard
-libraries, so that all stakeholders can be confident about the direction the
-language is evolving in.
+and controlled path for new features to enter Sawtooth Core and other official
+project components, so that all stakeholders can be confident about the
+direction Sawtooth is evolving in.
 
 This process is intended to be substantially similar to the Rust RFCs process,
 customized as necessary for use with Sawtooth. The README.md and
