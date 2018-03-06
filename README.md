@@ -15,8 +15,8 @@ language is evolving in.
 
 This process is intended to be substantially similar to the Rust RFCs process,
 customized as necessary for use with Sawtooth. The README.md and
-000-template.md were initially forked from the [Rust RFCs'
-README.md](https://github.com/rust-lang/rfcs).
+000-template.md were initially forked from [Rust
+RFCs](https://github.com/rust-lang/rfcs).
 
 
 ## Table of Contents
