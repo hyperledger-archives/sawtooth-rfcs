@@ -9,7 +9,7 @@ bit of a design process and produce a consensus among the Sawtooth community and
 the [sub-team]s.
 
 The "RFC" (request for comments) process is intended to provide a consistent
-and controlled path for new features to enter Sawtooth Core and other official
+and controlled path for major changes to enter Sawtooth Core and other official
 project components, so that all stakeholders can be confident about the
 direction Sawtooth is evolving in.
 
@@ -75,7 +75,7 @@ the Sawtooth community's [sub-team] specific guidelines for:
 [Before creating an RFC]: #before-creating-an-rfc
 
 A hastily-proposed RFC can hurt its chances of acceptance. Low quality
-proposals, proposals for previously-rejected features, or those that don't fit
+proposals, proposals for previously-rejected changes, or those that don't fit
 into the near-term roadmap, may be quickly rejected, which can be demotivating
 for the unprepared contributor. Laying some groundwork ahead of the RFC can
 make the process smoother.
@@ -201,8 +201,8 @@ rationale for the decision.
 ## Implementing an RFC
 [Implementing an RFC]: #implementing-an-rfc
 
-Some accepted RFCs represent vital features that need to be implemented right
-away. Other accepted RFCs can represent features that can wait until some
+Some accepted RFCs represent vital changes that need to be implemented right
+away. Other accepted RFCs can represent changes that can wait until some
 arbitrary developer feels like doing the work. Every accepted RFC has an
 associated issue tracking its implementation in the Sawtooth JIRA issue tracker; thus that
 associated issue can be assigned a priority via the triage process that the
