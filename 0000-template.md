@@ -70,7 +70,7 @@ A few examples of what this can include are:
 
 - For consensus, global state, transaction processors, and smart contracts
   implementation proposals: Does this feature exists in other distributed
-  ledgers and what experience have their community had?
+  ledgers and what experience have their communities had?
 - For community proposals: Is this done by some other community and what were
   their experiences with it?
 - For other teams: What lessons can we learn from what other communities have
