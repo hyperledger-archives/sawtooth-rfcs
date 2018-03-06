@@ -86,8 +86,9 @@ beforehand, to ascertain that the RFC may be desirable; having a consistent
 impact on the project requires concerted effort toward consensus-building.
 
 The most common preparations for writing and submitting an RFC include talking
-the idea over on #sawtooth and proposing ideas to the Hyperledger Sawtooth
-mailing list (https://lists.hyperledger.org/mailman/listinfo/hyperledger-stl).
+the idea over on [#sawtooth](https://chat.hyperledger.org/channel/sawtooth) and
+proposing ideas to the Hyperledger Sawtooth mailing list
+(https://lists.hyperledger.org/mailman/listinfo/hyperledger-stl).
 
 As a rule of thumb, receiving encouraging feedback from long-standing project
 developers, and particularly members of the relevant [sub-team] is a good
