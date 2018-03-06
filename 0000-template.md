@@ -1,4 +1,4 @@
-- Feature Name: (fill me in with a unique ident, my_awesome_feature)
+- Feature Name: (fill me in with a unique identifier, my_awesome_feature)
 - Start Date: (fill me in with today's date, YYYY-MM-DD)
 - RFC PR: (leave this empty)
 - Sawtooth Issue: (leave this empty)
@@ -16,7 +16,7 @@ Why are we doing this? What use cases does it support? What is the expected outc
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-Explain the proposal as if it was already included in the language and you were teaching it to another Sawtooth programmer. That generally means:
+Explain the proposal as if it was already included in Sawtooth and you were teaching it to another Sawtooth programmer. That generally means:
 
 - Introducing new named concepts.
 - Explaining the feature largely in terms of examples.
@@ -24,7 +24,7 @@ Explain the proposal as if it was already included in the language and you were 
 - If applicable, provide sample error messages, deprecation warnings, or migration guidance.
 - If applicable, describe the differences between teaching this to existing Sawtooth programmers and new Sawtooth programmers.
 
-For implementation-oriented RFCs (e.g. for compiler internals), this section should focus on how compiler contributors should think about the change, and give examples of its concrete impact. For policy RFCs, this section should provide an example-driven introduction to the policy, and explain its impact in concrete terms.
+For implementation-oriented RFCs (e.g. for validator internals), this section should focus on how contributors should think about the change, and give examples of its concrete impact. For policy RFCs, this section should provide an example-driven introduction to the policy, and explain its impact in concrete terms.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
@@ -55,7 +55,7 @@ Why should we *not* do this?
 Discuss prior art, both the good and the bad, in relation to this proposal.
 A few examples of what this can include are:
 
-- For language, library, cargo, tools, and compiler proposals: Does this feature exists in other programming languages and what experience have their community had?
+- For consensus, global state, transaction processors, and smart contracts implementation proposals: Does this feature exists in other distributed ledgers and what experience have their community had?
 - For community proposals: Is this done by some other community and what were their experiences with it?
 - For other teams: What lessons can we learn from what other communities have done here?
 - Papers: Are there any published papers or great posts that discuss this? If you have some relevant papers to refer to, this can serve as a more detailed theoretical background.
@@ -63,8 +63,8 @@ A few examples of what this can include are:
 This section is intended to encourage you as an author to think about the lessons from other languages, provide readers of your RFC with a fuller picture.
 If there is no prior art, that is fine - your ideas are interesting to us whether they are brand new or if it is an adaptation from other languages.
 
-Note that while precedent set by other languages is some motivation, it does not on its own motivate an RFC.
-Please also take into consideration that rust sometimes intentionally diverges from common language features.
+Note that while precedent set by other distributed ledgers is some motivation, it does not on its own motivate an RFC.
+Please also take into consideration that Sawtooth sometimes intentionally diverges from common distributed ledger/blockchain features.
 
 # Unresolved questions
 [unresolved]: #unresolved-questions
