@@ -15,7 +15,7 @@ direction Sawtooth is evolving in.
 
 This process is intended to be substantially similar to the Rust RFCs process,
 customized as necessary for use with Sawtooth. The README.md and
-000-template.md were initially forked from [Rust
+0000-template.md were initially forked from [Rust
 RFCs](https://github.com/rust-lang/rfcs).
 
 
