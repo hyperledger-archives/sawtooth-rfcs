@@ -29,6 +29,8 @@ teaching it to another Sawtooth programmer. That generally means:
   migration guidance.
 - If applicable, describe the differences between teaching this to existing
   Sawtooth programmers and new Sawtooth programmers.
+- If applicable, describe any changes that may affect the security of
+  communications or administration.
 
 For implementation-oriented RFCs (e.g. for validator internals), this section
 should focus on how contributors should think about the change, and give

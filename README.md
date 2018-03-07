@@ -49,6 +49,7 @@ following.
   - Substantial changes to component interfaces
   - New core features
   - Backward incompatible changes
+  - Changes that affect the security of communications or administration
 
 Some changes do not require an RFC:
 
