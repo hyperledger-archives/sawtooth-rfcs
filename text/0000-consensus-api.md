@@ -7,7 +7,7 @@
 [summary]: #summary
 
 This RFC describes a new Consensus API for supporting both the existing
-_Nakamoto-style_ consensus algorithms as well as _elected leader_ algorithms
+_lottery_ consensus algorithms as well as _voting_ algorithms
 such as rBFT.
 
 # Motivation
@@ -33,15 +33,15 @@ this research came the following observations:
 
 These observations led to the creation of the _Consensus Engine_ abstraction,
 which can be used to implement any consensus algorithm that is either an
-_elected leader_ algorithm or a _Nakamoto-style_ algorithm.
+_voting_ algorithm or a _lottery_ algorithm.
 
 ## Comparison of Algorithm Types
 
-The following describes the differences between what we refer to as _elected
-leader_ and _Nakamoto-style_ algorithms for the purpose of understanding how
-both are handled by the consensus interface.
+The following describes the differences between what we refer to as _voting_
+and _lottery_ algorithms for the purpose of understanding how both are handled
+by the consensus interface.
 
-In _elected leader_ consensus algorithms:
+In _voting_ consensus algorithms:
 
 - A single node is authorized to make commits at any given time.
 - One or more nodes in the network is required to maintain a "global view" of
@@ -51,10 +51,10 @@ In _elected leader_ consensus algorithms:
 - Many "consensus-specific" messages are passed between nodes on the network to
   coordinate consensus.
 
-Examples of _elected leader_ algorithms include PBFT, rBFT, Tendermint, and
+Examples of _voting_ algorithms include PBFT, rBFT, Tendermint, and
 Raft.
 
-In _Nakamoto-style_ consensus algorithms:
+In _lottery_ consensus algorithms:
 
 - All nodes are authorized to make commits at any given time.
 - Nodes need only be aware of their peers on the network (not all nodes).
@@ -62,7 +62,7 @@ In _Nakamoto-style_ consensus algorithms:
 - There are no "consensus-specific" messages; consensus is an emergent property
   of the fork-resolution logic.
 
-Examples of _Nakamoto-style_ consensus algorithms include Proof-of-Work (PoW)
+Examples of _lottery_ consensus algorithms include Proof-of-Work (PoW)
 and Proof-of-Elapsed-Time (PoET).
 
 ## Overview of the Consensus Engine
@@ -108,7 +108,7 @@ possible to run consensus in a separate process.
 In order to be efficient, the consensus algorithm must be responsible for
 determining when to publish blocks and when to update the chain head.
 
-For example, in Elected Leader algorithms, only one node is authorized to
+For example, in voting algorithms, only one node is authorized to
 publish blocks at any given time and the authorized node often does not change
 until it is deemed faulty. In a stable environment, this could be an indefinite
 amount of time. If consensus is not responsible for determining when to publish
