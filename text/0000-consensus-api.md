@@ -7,8 +7,8 @@
 [summary]: #summary
 
 This RFC describes a new Consensus API for supporting both the existing
-_Nakamoto-style_ consensus algorithms as _elected leader_ algorithms such as
-rBFT.
+_Nakamoto-style_ consensus algorithms as well as _elected leader_ algorithms
+such as rBFT.
 
 # Motivation
 [motivation]: #motivation
