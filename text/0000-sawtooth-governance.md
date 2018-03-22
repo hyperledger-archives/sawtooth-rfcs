@@ -332,8 +332,12 @@ project maintained a consistent vision was preferred.
 # Prior art
 [prior-art]: #prior-art
 
-The team hierarchy proposed in this RFC is heavily influenced by the [Rust Governance](https://github.com/rust-lang/rfcs/blob/master/text/1068-rust-governance.md)
-model.
+This RFC is directly derived from the [Rust Governance RFC][rust-gov] and
+copyright of the text can be determined in that repository. The repository is
+dual-licensed, and we are using the RFC under Apache 2.0. The LICENSE-APACHE
+file from the original repository is included as LICENSE in this repository.
+
+[rust-gov]: https://github.com/rust-lang/rfcs/blob/master/text/1068-rust-governance.md
 
 The contributor statuses proposed in this RFC are loosely based on ideas from the [Hyperledger Fabric Contributor Guide](https://hyperledger-fabric.readthedocs.io/en/release-1.0/CONTRIBUTING.html)
 and preexisting community norms within the Sawtooth project.
