@@ -45,6 +45,7 @@ particular repository.
 ## Project Team Hierarchy
 
 The Sawtooth governance model consists of a root team and a number of subteams.
+Team rosters should be kept public and easily accessible.
 
 ### Root Team
 
