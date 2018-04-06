@@ -7,15 +7,14 @@
 [summary]: #summary
 
 This RFC proposes an explicit governance structure for the Hyperledger Sawtooth
-project and establishes the initial teams and members that makeup this
-structure. It also defines the meaning of committer and maintainer for
-individual repositories.
+project and an initial list of teams that make up this structure. It also
+defines several levels of contributor status for component repositories.
 
 # Motivation
 [motivation]: #motivation
 
 Many important aspects of the Sawtooth governance model have been based on
-implicit norms and expectation. As the project continues to grow, it is
+implicit norms and expectations. As the project continues to grow, it is
 important that this governance model be made explicit with respect to decision
 making authority, repository ownership, and the establishment of the project's
 direction and vision. To this end, this RFC seeks to make explicit existing
@@ -29,7 +28,7 @@ At a high-level, the Sawtooth governance model consists of two arms:
 
 1. A hierarchy of teams responsible for the continued growth and success of the
    project
-2. A set of contributor levels used to manage component repository permissions.
+2. A set of contributor levels used to manage component repository permissions
 
 The team hierarchy contains a high-level root team and a set of more focused
 subteams, each of which is led by a member of the root team. Having a member of
