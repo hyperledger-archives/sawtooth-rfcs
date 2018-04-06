@@ -70,6 +70,9 @@ particular, it:
   set of subteams or it may make sense to have temporary "strike teams" that
   focus on a particular, limited task.
 
+* Resolving conflicts in rare cases where subteams are unable to reach
+  consensus.
+
 The root team includes stakeholders who are actively involved in the Sawtooth
 community and have expertise within the project. Subteam leaders are chosen
 from the root team.
@@ -135,8 +138,9 @@ for:
 * Ensuring that RFCs and PRs are progressing at a reasonable rate and
   re-assigning shepherds/reviewers as needed.
 
-* Making final decisions in cases of contentious RFCs that are unable to reach
-  consensus otherwise (should be rare).
+* Making final decisions with the support of the root team in cases of
+  contentious RFCs that are unable to reach consensus within the subteam
+  otherwise (should be rare).
 
 The way that subteams communicate internally and externally is left to each
 subteam to decide, but:
@@ -214,8 +218,10 @@ In either case, an alternative form of decision-making is needed.
 * For the "trivial" case, usually either the RFC shepherd or subteam leader
   will make an executive decision.
 
-* For the "deep" case, the subteam leader is empowered to make a final
-  decision, but should consult with the rest of the root team before doing so.
+* For the "deep" case, the subteam leader should propose a final decision to
+  the rest of the root team. If the root team unanimously agrees than the
+  decision will be finalized and the subteam leader will report the results to
+  the subteam.
 
 #### Final Comment Period (FCP)
 
