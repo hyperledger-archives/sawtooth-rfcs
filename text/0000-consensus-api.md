@@ -14,8 +14,8 @@ such as rBFT.
 [motivation]: #motivation
 
 The motivation for this RFC is to support integrating new non-lottery-based
-consensus mechanisms with Sawtooth, such as rBFT, while continuing to support
-PoET/SGX, PoET/Simulator, and devmode consensus modules.
+consensus mechanisms with Sawtooth, such as raft and rBFT, while continuing to
+support PoET/SGX, PoET/Simulator, and devmode consensus algorithms.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
@@ -32,7 +32,7 @@ this research came the following observations:
     c. An internal interrupt
 
 These observations led to the creation of the _Consensus Engine_ abstraction,
-which can be used to implement any consensus algorithm that is either an
+which can be used to implement any consensus algorithm that is either a
 _voting_ algorithm or a _lottery_ algorithm.
 
 ## Comparison of Algorithm Types
