@@ -89,23 +89,23 @@ The design of Sabre includes three fundamental data structures:
 
 Generally speaking, transaction processors can read and write arbitrary global
 state addresses. While restrictions can be placed upon the transaction
-processor via a couple different existing mechanisms, they are not granular
+processor via a couple of different existing mechanisms, they are not granular
 enough to be used in the context of Sabre, since all Sabre contracts would be
 subject to the same restrictions.
 
 Smart contracts and namespaces of global state are not necessarily a one-to-one
-relationship. For example, if we could create separate Sabre smart contracts
+relationship. For example, we could create separate Sabre smart contracts
 which provide multiplication and addition operations on the intkey namespace.
 Both smart contracts would operate on the same intkey namespace. Since
 this is the case, for a fully permissioned system we desire the ability to
 control access to the namespace independently from the permission to deploy and
 maintain the smart contracts.
 
-In Sabre, A namespace registry is used to control permissions related to
+In Sabre, a namespace registry is used to control permissions related to
 a namespace. The entry in the namespace registry for a namespace also contains
 a list of owners, which can be updated through transactions. An owner of the
 namespace can add and remove permissions associated with specific contracts.
-Thus, the owner of the intkey namespace and add permissions which allow the
+Thus, the owner of the intkey namespace can add permissions which allow the
 multiplication and addition smart contracts read and write access. This
 delegates some authority to the smart contract owners; so while the owner of
 the namespace and owner of the contract are not necessarily the same, there is
@@ -371,8 +371,8 @@ Delete a contract and remove its entry from the associated contract registry.
   }
 ```
 
-If the contract does not already exists or does not have an entry the contract
-registry the transactions is invalid.
+If the contract does not already exist or does not have an entry in the
+contract registry the transactions is invalid.
 
 If the transaction signer is not an owner, they cannot delete the contract and
 the transaction is invalid.
@@ -448,7 +448,7 @@ Create a contract registry with no version.
   }
 ```
 
-If the contract registry for the provided contact name already exists, then
+If the contract registry for the provided contact name already exists, the
 transaction is invalid.
 
 The new contract registry is created for the name and provided owners. The
@@ -530,8 +530,8 @@ already exists, the transaction is invalid.
 
 Only those whose public keys are stored in ``sawtooth.swa.administrators`` are
 allowed to create new namespace registries. If the transaction signer is an
-administrator, the new namespace registry will set in state in a the namespace
-registry list.Otherwise, the transaction is invalid.
+administrator, the new namespace registry is set in state. Otherwise, the
+transaction is invalid.
 
 The inputs for CreateNamespaceRegistryAction must include:
 
