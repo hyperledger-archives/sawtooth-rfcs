@@ -680,7 +680,7 @@ No dependencies.
 [subteam]: #subteam
 
 A Sawtooth Sabre sub-team shall be formed; this sub-team shall be responsible
-for the following related to Sabre: sheparding RFCs, accepting or rejecting
+for the following related to Sabre: shepharding RFCs, accepting or rejecting
 RFCs, policy decisions (including when RFCs are required), and making decisions
 on topics which do not require an RFC.
 
