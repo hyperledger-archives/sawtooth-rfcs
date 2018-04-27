@@ -63,8 +63,8 @@ SDK's transaction processor API. It further attempts to provide these
 capabilities in the most source-compatible way possible to make it easy to
 transition existing transaction processors to run as a Sabre smart contract.
 
-The goal of Sawtooth Sabre is to provide a Sawototh-native on-chain smart
-contract capbility to Sawtooth. The goal of the design and implementation
+The goal of Sawtooth Sabre is to provide a Sawtooth-native on-chain smart
+contract capability to Sawtooth. The goal of the design and implementation
 described in this RFC is to jumpstart Sabre with a minimal but usable
 implementation, not describe every eventual feature.
 
