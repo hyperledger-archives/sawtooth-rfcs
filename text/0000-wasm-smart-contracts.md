@@ -783,3 +783,8 @@ The current design does not describe a method for limiting execution (in
 a manner similar to gas in Ethereum). It is therefore not yet suitable for
 deployment of code by potentially malicious actors. This will be addressed in
 a future RFC.
+
+The interpreter used by Sabre, Wasmi, does not currently offer a way to halt
+the execution of a function. However, it would be relatively simple to add
+an option to the module constructor that would specify an upper limit for the
+number of intructions that can be executed.
