@@ -448,7 +448,7 @@ Create a contract registry with no version.
   }
 ```
 
-If the contract registry for the provided contact name already exists, the
+If the contract registry for the provided contract name already exists, the
 transaction is invalid.
 
 Only those whose public keys are stored in ``sawtooth.swa.administrators`` are
