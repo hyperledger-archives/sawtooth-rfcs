@@ -781,12 +781,24 @@ the Ethereum Virtual Machine as well as [Parity][parity] and
 # Unresolved questions
 [unresolved]: #unresolved-questions
 
-The current design does not describe a method for limiting execution (in
-a manner similar to gas in Ethereum). It is therefore not yet suitable for
-deployment of code by potentially malicious actors. This will be addressed in
-a future RFC.
+Any Turing-complete system that supports arbitrary code execution necessarily
+is subject to the undecidability of the Halting Problem. Because Sawtooth
+transaction processors do not afford any protection against the Halting
+Problem, it is up to developers and reviewers to ensure transaction processing
+halts for all input. Because the "traditional" deployment model for transaction
+processors requires cross-network coordination, there is ample opportunity for
+review by the entire network because all participants have to agree to install
+the new processor.
 
-The interpreter used by Sabre, Wasmi, does not currently offer a way to halt
-the execution of a function. However, it would be relatively simple to add
-an option to the module constructor that would specify an upper limit for the
-number of intructions that can be executed.
+The Sabre transaction processor supplements this traditional deployment model
+with a more flexible model that allows new smart contracts to be deployed
+without full consensus across the network. By delegating responsibility to
+fewer individuals, there are fewer opportunities to confirm that processing
+always halts. As a result, it is desired that some form of execution limiting
+be applied to smart contracts run by the Sabre transaction processor.
+
+This feature is outside the scope of the initial implementation and will be
+addressed in a future RFC. Currently, instruction counting is being considered
+as one possible solution to this problem, inspired by the concept of "gas" used
+by the Ethereum Virtual Machine, however more work needs to be done before a
+complete design is proposed.
