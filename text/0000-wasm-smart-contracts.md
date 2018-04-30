@@ -748,6 +748,16 @@ However, the inherent complexity, both from an implementation and a user
 experience perspective, makes this solution less desirable. It would also
 provide no natural transition path from Sawtooth transaction processors.
 
+The versioning system in Sabre provides upgrade functionality in a more
+traditional software deployment pattern than that used in the Ethereum
+approach. In the Ethereum approach, smart contracts are immutible and
+independent, which are good attributes for a public network; however, these
+constraints require a smart contract developer to understand novel
+Ethereum-specific patterns and perform significant pre-planning to ensure the
+ability to smoothly upgrade to a newer smart contract. In Sabre, we have
+selected an upgrade pattern suitable for permissioned networks which is
+both simple and conceptually closer to traditional software upgrade patterns.
+
 # Prior art
 [prior-art]: #prior-art
 
