@@ -1,7 +1,7 @@
 - Feature Name: state-pruning
 - Start Date: 2018-03-21
-- RFC PR: (leave this empty)
-- Sawtooth Issue: (leave this empty)
+- RFC PR: https://github.com/hyperledger/sawtooth-rfcs/pull/8
+- Sawtooth Issue: https://jira.hyperledger.org/browse/STL-1133
 
 # Summary
 [summary]: #summary
