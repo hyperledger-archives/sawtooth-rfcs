@@ -43,12 +43,12 @@ referenced by the modified nodes in the trie.  Deleted nodes are no longer
 referenced, which results in the parent nodes' hashes being updated.
 
 Along side the serialized node, a change log for a particular state root is
-stored.  This change log includes the keys of values that are added, and keys of
-deleted values by replaced by future state roots. The change log is written to
-the database in the same LMDB transaction of the state root itself.  The deleted
-values are added to trie's change log when a successor state root is produced,
-and replaces keys with new values. An entry for deletions is recorded for all
-successor state roots.
+stored.  This change log includes the hash keys of values that are added, and
+hash keys of deleted values which are replaced by future state roots. The change
+log is written to the database in the same LMDB transaction of the state root
+itself.  The deleted values are added to trie's change log when a successor
+state root is produced, and replaces keys with new values. An entry for
+deletions is recorded for all successor state roots.
 
 This change-log entry also includes the parent state-root.
 
@@ -80,7 +80,8 @@ This compaction operation will be available as a subcommand of `sawadm`.
 ## Configuration
 
 Maximum block depth is a local configuration option.  It is set via the command
-line parameter `--state-pruning-block-depth` and defaults to `1000`.
+line parameter `--state-pruning-block-depth` and defaults to `1000` or with the
+configuration setting `state_pruning_block_depth` in the `validator.toml` file.
 
 This is a local setting, as pruning helps manage local resource constraints.
 Network-wide settings have no knowledge of local disk size issues.
@@ -337,7 +338,7 @@ required.
 Ethereum Geth has also discussed the use of state pruning for their Merkle trie
 implemenation. It has not yet implemented this for its disk-based storage, but
 it has implemented reference counting for its in-memory storage of the trie. See
-this [blog post](https://blog.ethereum.org/2015/06/26/state-trie-pruning/) for
+this [blog post](https://blog.ethereum.org/2015/06/26/state-tree-pruning/) for
 more information.
 
 The current design issue for Geth can be found
