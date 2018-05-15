@@ -16,8 +16,8 @@
 
 - Feature Name: wasm\_smart\_contracts
 - Start Date: 2018-04-16
-- RFC PR: (leave this empty)
-- Sawtooth Issue: (leave this empty)
+- RFC PR: [hyperledger/sawtooth-rfcs#7](https://github.com/hyperledger/sawtooth-rfcs/pull/7)
+- Sawtooth Issue: N/A
 
 # Summary
 [summary]: #summary
