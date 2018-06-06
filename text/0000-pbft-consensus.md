@@ -1,0 +1,480 @@
+- Feature Name: pbft-consensus
+- Start Date: 2018-06-18
+- RFC PR: (leave this empty)
+- Sawtooth Issue: (leave this empty)
+
+# Summary
+[summary]: #summary
+This RFC describes a practical Byzantine fault tolerant (PBFT) consensus
+algorithm for Hyperledger Sawtooth. The algorithm uses the Consensus API
+described in [a pending Sawtooth RFC][consensus_engine].
+
+
+# Motivation
+[motivation]: #motivation
+The motivation for this RFC is to add a new, voting-based consensus mechanism
+with Byzantine fault tolerance to the capabilities of Hyperledger Sawtooth.
+This PBFT consensus algorithm ensures safety and liveness of a network,
+provided at most `floor((n - 1)/3)` nodes are faulty, where `n` is the total
+number of nodes [[1]](#references). The PBFT algorithm is also inherently
+crash fault tolerant. Eventually, the base PBFT algorithm can be extended to
+other PBFT-style algorithms, which can potentially decrease the number of
+nodes in the network needed for it to be Byzantine fault tolerant, and reduce
+the total number of inter-node communication steps required.
+
+
+# Guide-level explanation
+[guide-level-explanation]: #guide-level-explanation
+
+## The Byzantine Generals Problem
+Malicious users and code bugs can cause nodes in a network to exhibit
+[arbitrary (Byzantine) behavior][byzantine_behavior] [[1]](#references).
+Byzantine behavior can be described by nodes that send conflicting information
+to other nodes in the network [[2]](#references).
+
+**Example:**
+Consider a scenario where there is a binary decision to be made: "to be" or
+"not to be." Say that there are nine nodes in a network. Four nodes send a
+"to be" message to all the other nodes, and four send "not to be" to all other
+nodes. However, the last node is faulty and sends "to be" to half of the
+nodes, and "not to be" to the other half. Because of this faulty node, the
+network ends up in an existential crisis. The goal of a Byzantine fault
+tolerant system is to resolve crises like this.
+
+## Practical Byzantine Fault Tolerance
+Algorithms that attempt to conquer the aforementioned Byzantine faults are
+called Byzantine fault tolerant algorithms. Such algorithms include: Zyzzyva,
+RBFT, MinBFT, and PBFT. This RFC focuses on the base PBFT algorithm.
+
+Practical Byzantine Fault Tolerance (PBFT) is a consensus algorithm described
+by Miguel Castro and Barbara Liskov in 1999 [[1]](#references). This consensus
+algorithm is *voting*-based, meaning [[3]](#references):
++ Only a single node (the primary) can make commits at any given time
++ One or more nodes in the network maintains a global view of the network
++ Adding and removing nodes from the network is difficult
++ There are many peer-to-peer messages passed in between nodes which
+  specifically relate to consensus (see [Message Types](#message-types))
+
+In a general sense, PBFT works as follows:
+1. A client sends a message (request) to all the nodes in the network
+2. A series of messages is sent between nodes to determine if the request is
+  valid, or has been tampered with.
+3. Once a number of nodes agree that the request is valid, then the
+  instructions (operations) in the request are executed, and a result (reply)
+  is returned to the client.
+4. The client waits for a number of replies that match, then accepts the
+  result.
+
+## Terminology
+
+| Term              | Definition                                   |
+| ----------------: | :------------------------------------------- |
+| Node              | Machine running all the components necessary for a working blockchain (including the Validator, the REST API, a transaction processor, and the PBFT algorithm itself)|
+| Server            | Synonym for node |
+| Replica           | Synonym for node |
+| Block             | A part of the [blockchain](https://en.wikipedia.org/wiki/Blockchain), containing some operations and a pointer to the previous block |
+| Primary           | Node in charge of making the final consensus decisions and committing to the blockchain |
+| Secondary         | Auxiliary node used for consensus |
+| Client            | Machine that sends requests to and receives replies from the network of nodes |
+| Checkpoint        | Point in time where logs can get garbage collected |
+| Checkpoint period | How many client requests in between each checkpoint |
+| Block duration    | How many seconds to wait in between the creation of each block |
+| Message           | Block |
+| Working block     | The block that has been initialized but not finalized, and is currently being committed to |
+| Low water mark    | The sequence number of the last stable checkpoint |
+| High water mark   | Low water mark plus the desired maximum size of nodes' message log |
+| View              | The scope of PBFT when the current primary is in charge. The view changes when the primary is deemed faulty, as described in [View Changes](#view-changes) |
+| n                 | The total number of nodes in the network |
+| f                 | The maximum number of faulty nodes |
+| v                 | The current view number |
+| p                 | The primary server number; p = v mod n |
+
+
+# Reference-level explanation
+[reference-level-explanation]: #reference-level-explanation
+The PBFT consensus algorithm will be written in Rust, and will implement the
+`Engine` trait described in [the Consensus API][consensus_engine]
+[[3]](#references).
+
+## Data Structures
+
+### Consensus Messages
+[consensus-messages]: #consensus-messages
+These are the messages that will be sent from node to node which specifically
+relate to consensus. The content of all consensus-related messages are
+serialized using protobuf.
+
+From the Consensus API [[3]](#references):
+
+```
+// A consensus-related message sent between peers
+message ConsensusPeerMessage {
+  // Interpretation is left to the consensus engine implementation
+  string message_type = 1;
+
+  // The opaque payload to send to other nodes
+  bytes content = 2;
+
+  // Used to identify the consensus engine that produced this message
+  string name = 3;
+  string version = 4;
+}
+```
+
+Consensus messages sent by the PBFT algorithm will have one of the following
+types (contained in the `message_type` field of `ConsensusPeerMessage`):
+
++ `pre_prepare`
++ `prepare`
++ `commit`
++ `commit_final`
++ `checkpoint`
++ `view_change`
++ `new_view`
+
+### Message Types
+[message-types]: #message-types
+In order for PBFT to work correctly, peers on the network need to send a
+significant number of messages to each other. Most messages (`pre_prepare`,
+`prepare`, `commit`, and `commit_final`, and `checkpoint`) have similar
+contents, shown by `PbftMessage`. Auxiliary messages related to view changes
+(`view_change` and `new_view`) are also shown. Furthermore, PBFT uses some of
+the message types defined in the consensus API, such as blockchain-related
+messages like `BlockNew` and `BlockCommit`, and as the system update message
+`Shutdown`.
+
+The following Protobuf-style definitions are used to represent all
+consensus-related messages in the PBFT system:
+
+```
+// PBFT-specific block information (don't need to keep sending the whole payload
+// around the network)
+message PbftBlock {
+  bytes block_id = 1;
+
+  bytes signer_id = 2;
+
+  uint64 block_num = 3;
+
+  bytes summary = 4;
+}
+
+// Represents all common information used in a PBFT message
+message PbftMessageInfo {
+  // Type of the message
+  string msg_type = 1;
+
+  // View number
+  uint64 view = 2;
+
+  // Sequence number (helps with ordering log)
+  uint64 sequence_number = 3;
+
+  // Node who signed the message
+  bytes signer_id = 4;
+}
+```
+
+```
+// A generic PBFT message (pre_prepare, prepare, commit, commit_final,
+// Checkpoint)
+message PbftMessage {
+  // Message information
+  PbftMessageInfo info = 1;
+
+  // The actual message
+  PbftBlock block = 2;
+}
+```
+
+```
+// View change message, for when a node suspects the primary node is faulty
+message PbftViewChange {
+  // Message information
+  PbftMessageInfo info = 1;
+
+  // Set of `2f + 1` checkpoint messages, proving correctness of stable
+  // checkpoint mentioned in info's `sequence_number`
+  repeated PbftMessage checkpoint_messages = 2;
+
+  message PrepareMessagePair {
+    PbftMessage pre_prepare_message = 1;
+
+    repeated PbftMessage prepare_messages = 2;
+  }
+
+  // `pre_prepare` message and `2f` `prepare` messages for each `BlockNew`
+  // message with a sequence number greater than `sequence_number`
+  // Used to help construct `PbftNewView` `pre_prepare_messages`
+  PrepareMessagePair prepare_messages = 3;
+}
+
+
+// New view message, for when there is consensus that the primary is faulty
+message PbftNewView {
+  // Message information
+  PbftMessageInfo info = 1;
+
+  // Valid `view_change` messages received by new primary and the original
+  // `view_change` message sent by the new primary
+  repeated PbftViewChange view_change_messages = 2;
+
+  // New set of `pre_prepare` messages for every sequence number in between
+  // the last stable checkpoint in `view_change_messages` and the highest
+  // sequence number in `view_change_messages`.
+  repeated PbftMessage pre_prepare_messages = 3;
+}
+```
+
+## Algorithm Operation
+The PBFT algorithm will operate within the framework described by the Consensus
+API [[3]](#references). The `start` method contains an event loop which
+handles all incoming messages, in the form of `Update`s. The most important
+form of `Update` to the functionality of PBFT is `Update::PeerMessage`, but
+other updates like `BlockNew`, `BlockCommit`, `BlockValid`, and `Shutdown` are
+considered.
+
+### Peer Messages
+When a message arrives from a peer, it must be interrogated for its type, and
+then the system must create a corresponding language-specific object of that
+message type. This is made easier by the fact that all consensus messages are
+protobuf-serialized. Generally, once a message is converted into an appropriate
+object, it needs to be checked for content to make sure everything is
+legitimate. Some of these checks are performed by the validator (checking that
+a message's signature is valid), but some (making sure messages match) need to
+be handled by the PBFT consensus engine.
+
+### Node Information Storage
+Nodes will keep track of the following information:
++ Their own id.
+
++ Log of every peer message that has been sent to it (used to determine if
+  nodes have received enough matching messages to proceed to the next stage of
+  the algorithm, can be [garbage collected](#garbage-collection) every so
+  often).
+
++ List of their connected peers.
+
++ Which step of the algorithm they're on.
+
+### Predicates
+In order to keep the algorithm explanation below concise, we'll define some
+predicates here.
+
++ `prepared` is true for the current node if the following messages are
+  present in its log:
+  + The original `BlockNew` message
+  + A `pre_prepare` message matching the original message (in the current view)
+  + `2f` matching `prepare` messages from different nodes that match
+    `pre_prepare` message above
+
++ `committed` is true if for the current node:
+  + `prepared` is true
+  + This node has accepted `2f + 1` `commit` messages, including its own
+
+### Normal Case Algorithm Operation
+#### Explanation of Message Types
++ `pre_prepare`: Sent from primary node to all nodes in the network, notifying
+them that a new message (`BlockNew`) has been received from the validator.
+
++ `prepare`: Sent from every node to every other node; used as verification of
+the pre-prepare message.
+
++ `commit`: Sent from every node to every other node; used to determine if there
+is consensus that we should indeed commit the block contained in the original
+message.
+
++ `commit_final`: Sent from all nodes back to the primary node; used as
+confirmation that the block should be committed.
+
++ `checkpoint`: Sent by any node that has completed `checkpoint_period`
+`commit_final` messages.
+
++ `view_change`: Sent by any node that suspects that the primary node is faulty.
+
++ `new_view`: Sent by any node that receives `2f` `view_change` messages.
+
+#### Initialization
+At the beginning of the Engine's `start` method, some initial setup is
+required:
++ Create the node for processing messages
++ Establish timers and counters for checkpoint periods and block durations
++ Initialize the first working block
+
+#### Event Loop
+In a normal context (when the primary node is not faulty), the PBFT consensus
+algorithm operates as follows, inside the event loop of the `start` method:
+
+1. Receive a `BlockNew` message from the validator, representative of a
+   client's request. The primary node checks the legitimacy of the message and
+   assigns this message a sequence number, then broadcasts a `pre_prepare`
+   message to all nodes. Legitimacy is checked by looking at the `signer_id`
+   of the block in the `BlockNew` message, and making sure the `previous_id`
+   is valid as the current chain head. Secondary nodes ignore `BlockNew`
+   messages; only append them to their logs.
+
+2. Receive `pre_prepare` messages and check their legitimacy. `pre_prepare`
+   messages are legitimate if:
+  + `signer_id` and `summary` of block inside `pre_prepare` match the
+    corresponding fields of the original `BlockNew` block &&
+  + View in `pre_prepare` message corresponds to this server's current view &&
+  + This message hasn't been accepted already with a different `summary` &&
+  + Sequence number is within the sequential bounds of the log (low and high
+    water marks)
+
+   Once the `pre_prepare` is accepted, broadcast a `prepare` message to all nodes.
+
+3. Receive `prepare` messages, and check them all against their associated
+   `pre_prepare` message in this node's message log.
+
+4. Once the predicate `prepared` is true for this node, then call
+   `check_block`. If an error occurs (`ReceiveError` or `UnknownBlock`),
+   abort (call `cancel_block`). Otherwise, wait for a response (`BlockValid`
+   or `BlockInvalid`) from the validator. If `BlockValid`, then broadcast a
+   `commit` message to all other nodes. If `BlockInvalid`, then call
+   `cancel_block`.
+
+5. When the predicate `committed` is true for this node, then send a
+   `commit_final` message back to the primary.
+
+6. Once the primary has accumulated `f + 1` `commit_final` messages, then
+   it should commit the block using `commit_block`, and advance the chain
+   head.
+
+7. If *block duration* has elapsed, then try to `summarize_block` with the
+   current working block. If the working block is not ready, (`BlockNotReady`
+   or `InvalidState` occurs), then nothing happens (call `ignore_block`).
+   Otherwise, `finalize_block` is called, and a new working block is created by
+   calling `initialize_block`.
+
+Messages passed during normal operation are roughly described by the following
+diagram:
+
+![PBFT operation](../images/pbft_sawtooth.png)
+
+One additional message type that may be encountered during the event loop is
+`BlockCommit`. This message type will cause the consensus algorithm to abort its
+current working block, and initialize a new one.
+
+### View Changes
+[view-changes]: #view-changes
+Sometimes, the node currently in charge (the primary) becomes faulty. In this
+case, a view change is necessary. View changes are triggered by a timeout:
+When a secondary node receives a `BlockNew` message, a timer is started. If
+the secondary ends up receiving a `commit_final` message, the timer is
+cancelled, and the algorithm proceeds as normal. If the timer expires, the
+primary node is considered faulty and a view change is initiated. This ensures
+Byzantine fault tolerance due to the fact that each step of the algorithm will
+not proceed to the next unless it receives a certain number of matching
+messages, and due to the fact that the Validator does not pass on any messages
+that have invalid signatures [[3]](#references).
+
+The view change process is as follows:
+1. Any node who discovers the primary as faulty (whose timer timed out) sends
+   a `view_change` message to all nodes.
+
+2. Once a server receives `2f` `view_change` messages, it changes its own view
+   to `v + 1` and sends a `new_view` message to all nodes. The new primary
+   node's ID is `p = v mod n`.
+
+3. New primary node adds all the messages from  the `new_view` field
+   `pre_prepare_messages` into its message log and re-executes the PBFT
+   multi-cast protocol for each.
+
+Messages passed during a view change operation are shown in the following
+diagram:
+
+![PBFT View Changes](../images/pbft_view_change.png)
+
+### Garbage Collection
+[garbage-collection]: #garbage-collection
+After each *checkpoint period* (around 100 successfully completed cycles of
+the algorithm), server log messages can possibly be garbage-collected. When
+each node reaches a checkpoint, it sends out a `Checkpoint` message to all of
+the other servers, with that node's current state (described by a
+`PbftBlock`).  When the current node has `2f + 1` matching `Checkpoint`
+messages from different servers, the checkpoint is considered *stable* and the
+logs can be garbage collected: All log entries with sequence number less than
+the one in the `Checkpoint` message are discarded, and all previous
+checkpoints are removed. The high and low water marks are updated to reflect
+the sequence number of the new stable checkpoint.
+
+
+# Drawbacks
+[drawbacks]: #drawbacks
+One possible downside of BFT-style consensus algorithms is that in general,
+`3n + 1` nodes are needed on the network in order to preserve Byzantine fault
+tolerance, unless special considerations are taken to ensure the authenticity
+of the peer-to-peer messages and sequence counters [[6]](#references). PBFT
+also requires a large number of consensus-specific messages; the general PBFT
+algorithm requires five per published block. Additionally, the base
+implementation of PBFT does not prevent nodes from "leaking" information to
+bad actors.
+
+A drawback of this specific design of PBFT is that the consensus algorithm
+operates serially; there is only one working block. Likely in a production
+environment, this will be unacceptable. A queue of working blocks will be
+necessary, each keeping track of what stage of the algorithm it is at.
+
+
+# Rationale and alternatives
+[alternatives]: #alternatives
+There are many other voting-type consensus algorithms available to anyone who
+wants to use them, such as those mentioned in [Prior art](#prior-art). Many of
+these algorithms are based on the methods described in this RFC, and most
+strategies employed by this RFC apply to PBFT's derivations as well.
+
+
+# Prior art
+[prior-art]: #prior-art
+Some papers on the topic of Practical Byzantine Fault Tolerance include:
++ The original PBFT paper [[1]](#references)
++ Improvements on PBFT [[4]](#references)
++ Speculative Byzantine Fault Tolerance [[5]](#references)
++ MinBFT and MinZyzzyva [[6]](#references)
+
+An implementation of the PBFT consensus algorithm is [currently under
+development](https://github.com/hyperledger/fabric/tree/release-1.1/orderer) at
+[Hyperledger Fabric](https://www.hyperledger.org/projects/fabric).
+
+An implementation of RAFT is also being developed for Hyperledger Sawtooth.
+
+
+# Unresolved questions
+[unresolved]: #unresolved-questions
++ What should the block consensus payload be comprised of (when calling
+  `finalize_block`)?
++ What is the best way to persistently store message logs? Do they need to be
+  secure/encrypted?
+
+
+# References
+[references]: #references
+[[1] M. Castro and B. Liskov. Practical Byzantine Fault Tolerance, _Operating
+Systems Design and Implementation_,
+1999.](https://www.usenix.org/legacy/events/osdi99/full_papers/castro/castro_html/castro.html)
+
+[[2] L. Lamport, R. Shostak, and M. Pease. The Byzantine Generals Problem. _ACM
+Transactions on Programming Languages and Systems_, 4(3),
+1982.](https://inst.eecs.berkeley.edu/~cs162/sp16/static/readings/Original_Byzantine.pdf)
+
+[[3] A. Ludvik. Consensus API. Sawtooth RFCs, March
+2018.](https://github.com/aludvik/sawtooth-rfcs/blob/500b3688acfb0cd4834ea6451a8c5e000f7f5174/text/0000-consensus-api.md)
+
+[[4] M. Castro and B. Liskov. Practical Byzantine Fault Tolerance and Proactive
+Recovery, _ACM Transactions on Computer Systems_, 20(4),
+2002.](http://zoo.cs.yale.edu/classes/cs426/2012/bib/castro02practical.pdf)
+
+[[5] R. Kotla, L. Alvisi et al. Zyzzyva: Speculative Byzantine Fault Tolerance.
+_ACM SIGOPS Operating Systems Review_, 41(6),
+2007.](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.122.112&rep=rep1&type=pdf)
+
+[[6] G. Veronese et al. Efficient Byzantine Fault Tolerance. _IEEE Transactions
+on Computers_, 62(1),
+2013.](http://homepages.gsd.inesc-id.pt/~mpc/pubs/Veronese-Efficient%20Byzantine%20Fault%20Tolerance.pdf)
+
+[byzantine_behavior]:
+https://en.wikipedia.org/wiki/Byzantine_fault_tolerance#Byzantine_Generals'_Problem
+
+[consensus_engine]:
+https://github.com/aludvik/sawtooth-rfcs/blob/500b3688acfb0cd4834ea6451a8c5e000f7f5174/text/0000-consensus-api.md
