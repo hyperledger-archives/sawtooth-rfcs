@@ -1,6 +1,6 @@
 - Feature Name: supply_chain_subteam
 - Start Date: 2018-05-04
-- RFC PR:
+- RFC PR: [hyperledger/sawtooth-rfcs#11](https://github.com/hyperledger/sawtooth-rfcs/pull/11)
 - Sawtooth Issue:
 
 # Summary
