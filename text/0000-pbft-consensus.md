@@ -72,6 +72,7 @@ In a general sense, PBFT works as follows:
 | Node              | Machine running all the components necessary for a working blockchain (including the Validator, the REST API, a transaction processor, and the PBFT algorithm itself)|
 | Server            | Synonym for node |
 | Replica           | Synonym for node |
+| Validator         | Component of a node responsible for interactions with the blockchain. Interactions with the validator are abstracted by the Consensus API |
 | Block             | A part of the [blockchain](https://en.wikipedia.org/wiki/Blockchain), containing some operations and a pointer to the previous block |
 | Primary           | Node in charge of making the final consensus decisions and committing to the blockchain |
 | Secondary         | Auxiliary node used for consensus |
@@ -79,7 +80,7 @@ In a general sense, PBFT works as follows:
 | Checkpoint        | Point in time where logs can get garbage collected |
 | Checkpoint period | How many client requests in between each checkpoint |
 | Block duration    | How many seconds to wait in between the creation of each block |
-| Message           | Block |
+| Message           | Block, with additional information (see [Data Structures](#data-structures)) |
 | Working block     | The block that has been initialized but not finalized, and is currently being committed to |
 | Low water mark    | The sequence number of the last stable checkpoint |
 | High water mark   | Low water mark plus the desired maximum size of nodes' message log |
@@ -124,21 +125,21 @@ message ConsensusPeerMessage {
 Consensus messages sent by the PBFT algorithm will have one of the following
 types (contained in the `message_type` field of `ConsensusPeerMessage`):
 
-+ `pre_prepare`
-+ `prepare`
-+ `commit`
-+ `commit_final`
-+ `checkpoint`
-+ `view_change`
-+ `new_view`
++ `PrePrepare`
++ `Prepare`
++ `Commit`
++ `CommitFinal`
++ `Checkpoint`
++ `ViewChange`
++ `NewView`
 
 ### Message Types
 [message-types]: #message-types
 In order for PBFT to work correctly, peers on the network need to send a
-significant number of messages to each other. Most messages (`pre_prepare`,
-`prepare`, `commit`, and `commit_final`, and `checkpoint`) have similar
+significant number of messages to each other. Most messages (`PrePrepare`,
+`Prepare`, `Commit`, and `CommitFinal`, and `Checkpoint`) have similar
 contents, shown by `PbftMessage`. Auxiliary messages related to view changes
-(`view_change` and `new_view`) are also shown. Furthermore, PBFT uses some of
+(`ViewChange` and `NewView`) are also shown. Furthermore, PBFT uses some of
 the message types defined in the consensus API, such as blockchain-related
 messages like `BlockNew` and `BlockCommit`, and as the system update message
 `Shutdown`.
@@ -176,7 +177,7 @@ message PbftMessageInfo {
 ```
 
 ```
-// A generic PBFT message (pre_prepare, prepare, commit, commit_final,
+// A generic PBFT message (PrePrepare, Prepare, Commit, CommitFinal,
 // Checkpoint)
 message PbftMessage {
   // Message information
@@ -193,8 +194,8 @@ message PbftViewChange {
   // Message information
   PbftMessageInfo info = 1;
 
-  // Set of `2f + 1` checkpoint messages, proving correctness of stable
-  // checkpoint mentioned in info's `sequence_number`
+  // Set of `2f + 1` Checkpoint messages, proving correctness of stable
+  // Checkpoint mentioned in info's `sequence_number`
   repeated PbftMessage checkpoint_messages = 2;
 
   message PrepareMessagePair {
@@ -203,7 +204,7 @@ message PbftViewChange {
     repeated PbftMessage prepare_messages = 2;
   }
 
-  // `pre_prepare` message and `2f` `prepare` messages for each `BlockNew`
+  // `PrePrepare` message and `2f + 1` `Prepare` messages for each `BlockNew`
   // message with a sequence number greater than `sequence_number`
   // Used to help construct `PbftNewView` `pre_prepare_messages`
   PrepareMessagePair prepare_messages = 3;
@@ -215,12 +216,12 @@ message PbftNewView {
   // Message information
   PbftMessageInfo info = 1;
 
-  // Valid `view_change` messages received by new primary and the original
-  // `view_change` message sent by the new primary
+  // Valid `ViewChange` messages received by new primary and the original
+  // `ViewChange` message sent by the new primary
   repeated PbftViewChange view_change_messages = 2;
 
-  // New set of `pre_prepare` messages for every sequence number in between
-  // the last stable checkpoint in `view_change_messages` and the highest
+  // New set of `PrePrepare` messages for every sequence number in between
+  // the last stable Checkpoint in `view_change_messages` and the highest
   // sequence number in `view_change_messages`.
   repeated PbftMessage pre_prepare_messages = 3;
 }
@@ -248,12 +249,16 @@ be handled by the PBFT consensus engine.
 Nodes will keep track of the following information:
 + Their own id.
 
-+ Log of every peer message that has been sent to it (used to determine if
++ Log of every peer message that has been sent to them (used to determine if
   nodes have received enough matching messages to proceed to the next stage of
-  the algorithm, can be [garbage collected](#garbage-collection) every so
+  the algorithm; can be [garbage collected](#garbage-collection) every so
   often).
 
-+ List of their connected peers.
++ List of their connected peers. This is provided at startup from on-chain
+  settings specified by the user. The length of this peer list will be used to
+  calculate `f`, the maximum number of faulty nodes this network can tolerate.
+  Currently, only static networks will be supported (that is, there will be no
+  adding or removal of peers).
 
 + Which step of the algorithm they're on.
 
@@ -264,35 +269,36 @@ predicates here.
 + `prepared` is true for the current node if the following messages are
   present in its log:
   + The original `BlockNew` message
-  + A `pre_prepare` message matching the original message (in the current view)
-  + `2f` matching `prepare` messages from different nodes that match
-    `pre_prepare` message above
+  + A `PrePrepare` message matching the original message (in the current view)
+  + `2f + 1` matching `Prepare` messages from different nodes that match
+    `PrePrepare` message above (including the one from this node)
 
 + `committed` is true if for the current node:
   + `prepared` is true
-  + This node has accepted `2f + 1` `commit` messages, including its own
+  + This node has accepted `2f + 1` `Commit` messages, including its own
 
 ### Normal Case Algorithm Operation
 #### Explanation of Message Types
-+ `pre_prepare`: Sent from primary node to all nodes in the network, notifying
++ `PrePrepare`: Sent from primary node to all nodes in the network, notifying
 them that a new message (`BlockNew`) has been received from the validator.
 
-+ `prepare`: Sent from every node to every other node; used as verification of
-the pre-prepare message.
++ `Prepare`: Sent from every node to every other node; used as verification of
+the PrePrepare message.
 
-+ `commit`: Sent from every node to every other node; used to determine if there
++ `Commit`: Sent from every node to every other node; used to determine if there
 is consensus that we should indeed commit the block contained in the original
 message.
 
-+ `commit_final`: Sent from all nodes back to the primary node; used as
++ `CommitFinal`: Sent from all nodes back to the primary node; used as
 confirmation that the block should be committed.
 
-+ `checkpoint`: Sent by any node that has completed `checkpoint_period`
-`commit_final` messages.
++ `Checkpoint`: Sent by any node that has completed `checkpoint_period`
+`CommitFinal` messages.
 
-+ `view_change`: Sent by any node that suspects that the primary node is faulty.
++ `ViewChange`: Sent by any node that suspects that the primary node is faulty.
 
-+ `new_view`: Sent by any node that receives `2f` `view_change` messages.
++ `NewView`: Sent by any node that receives `2f + 1` `ViewChange` messages,
+  including its own.
 
 #### Initialization
 At the beginning of the Engine's `start` method, some initial setup is
@@ -307,45 +313,46 @@ algorithm operates as follows, inside the event loop of the `start` method:
 
 1. Receive a `BlockNew` message from the validator, representative of a
    client's request. The primary node checks the legitimacy of the message and
-   assigns this message a sequence number, then broadcasts a `pre_prepare`
+   assigns this message a sequence number, then broadcasts a `PrePrepare`
    message to all nodes. Legitimacy is checked by looking at the `signer_id`
    of the block in the `BlockNew` message, and making sure the `previous_id`
    is valid as the current chain head. Secondary nodes ignore `BlockNew`
    messages; only append them to their logs.
 
-2. Receive `pre_prepare` messages and check their legitimacy. `pre_prepare`
+2. Receive `PrePrepare` messages and check their legitimacy. `PrePrepare`
    messages are legitimate if:
-  + `signer_id` and `summary` of block inside `pre_prepare` match the
+  + `signer_id` and `summary` of block inside `PrePrepare` match the
     corresponding fields of the original `BlockNew` block &&
-  + View in `pre_prepare` message corresponds to this server's current view &&
+  + View in `PrePrepare` message corresponds to this server's current view &&
   + This message hasn't been accepted already with a different `summary` &&
   + Sequence number is within the sequential bounds of the log (low and high
     water marks)
 
-   Once the `pre_prepare` is accepted, broadcast a `prepare` message to all nodes.
+   Once the `PrePrepare` is accepted, broadcast a `Prepare` message to all nodes.
 
-3. Receive `prepare` messages, and check them all against their associated
-   `pre_prepare` message in this node's message log.
+3. Receive `Prepare` messages, and check them all against their associated
+   `PrePrepare` message in this node's message log.
 
 4. Once the predicate `prepared` is true for this node, then call
    `check_block`. If an error occurs (`ReceiveError` or `UnknownBlock`),
    abort (call `cancel_block`). Otherwise, wait for a response (`BlockValid`
    or `BlockInvalid`) from the validator. If `BlockValid`, then broadcast a
-   `commit` message to all other nodes. If `BlockInvalid`, then call
+   `Commit` message to all other nodes. If `BlockInvalid`, then call
    `cancel_block`.
 
 5. When the predicate `committed` is true for this node, then send a
-   `commit_final` message back to the primary.
+   `CommitFinal` message back to the primary.
 
-6. Once the primary has accumulated `f + 1` `commit_final` messages, then
+6. Once the primary has accumulated `f + 1` `CommitFinal` messages, then
    it should commit the block using `commit_block`, and advance the chain
    head.
 
 7. If *block duration* has elapsed, then try to `summarize_block` with the
    current working block. If the working block is not ready, (`BlockNotReady`
    or `InvalidState` occurs), then nothing happens (call `ignore_block`).
-   Otherwise, `finalize_block` is called, and a new working block is created by
-   calling `initialize_block`.
+   Otherwise, `finalize_block` is called with a serialized summary of all the
+   `CommitFinal` messages this node has received (which functions as proof of
+   consensus). Lastly, a new working block is created by calling `initialize_block`.
 
 Messages passed during normal operation are roughly described by the following
 diagram:
@@ -361,7 +368,7 @@ current working block, and initialize a new one.
 Sometimes, the node currently in charge (the primary) becomes faulty. In this
 case, a view change is necessary. View changes are triggered by a timeout:
 When a secondary node receives a `BlockNew` message, a timer is started. If
-the secondary ends up receiving a `commit_final` message, the timer is
+the secondary ends up receiving a `CommitFinal` message, the timer is
 cancelled, and the algorithm proceeds as normal. If the timer expires, the
 primary node is considered faulty and a view change is initiated. This ensures
 Byzantine fault tolerance due to the fact that each step of the algorithm will
@@ -371,13 +378,15 @@ that have invalid signatures [[3]](#references).
 
 The view change process is as follows:
 1. Any node who discovers the primary as faulty (whose timer timed out) sends
-   a `view_change` message to all nodes.
+   a `ViewChange` message to all nodes, containing the node's current
+   sequence number, its current view, proof of the previous checkpoint, and
+   pending messages that have happened since that previous checkpoint.
 
-2. Once a server receives `2f` `view_change` messages, it changes its own view
-   to `v + 1` and sends a `new_view` message to all nodes. The new primary
-   node's ID is `p = v mod n`.
+2. Once a server receives `2f + 1` `ViewChange` messages (including its own),
+   it changes its own view to `v + 1` and sends a `NewView` message to all
+   nodes. The new primary node's ID is `p = v mod n`.
 
-3. New primary node adds all the messages from  the `new_view` field
+3. New primary node adds all the messages from  the `NewView` field
    `pre_prepare_messages` into its message log and re-executes the PBFT
    multi-cast protocol for each.
 
@@ -403,7 +412,7 @@ the sequence number of the new stable checkpoint.
 # Drawbacks
 [drawbacks]: #drawbacks
 One possible downside of BFT-style consensus algorithms is that in general,
-`3n + 1` nodes are needed on the network in order to preserve Byzantine fault
+`3f + 1` nodes are needed on the network in order to preserve Byzantine fault
 tolerance, unless special considerations are taken to ensure the authenticity
 of the peer-to-peer messages and sequence counters [[6]](#references). PBFT
 also requires a large number of consensus-specific messages; the general PBFT
@@ -427,17 +436,21 @@ strategies employed by this RFC apply to PBFT's derivations as well.
 
 # Prior art
 [prior-art]: #prior-art
-Some papers on the topic of Practical Byzantine Fault Tolerance include:
+#### Papers
 + The original PBFT paper [[1]](#references)
 + Improvements on PBFT [[4]](#references)
 + Speculative Byzantine Fault Tolerance [[5]](#references)
 + MinBFT and MinZyzzyva [[6]](#references)
 
-An implementation of the PBFT consensus algorithm is [currently under
-development](https://github.com/hyperledger/fabric/tree/release-1.1/orderer) at
-[Hyperledger Fabric](https://www.hyperledger.org/projects/fabric).
-
-An implementation of RAFT is also being developed for Hyperledger Sawtooth.
+#### Other consensus implementations
++ PBFT consensus algorithm [under
+  development](https://github.com/hyperledger/fabric/tree/release-1.1/orderer)
+  at [Hyperledger Fabric](https://www.hyperledger.org/projects/fabric)
++ Open Ethereum Improvement Proposal for Istanbul Byzantine fault tolerance in
+  [Ethereum][ethereum]
++ Implementation of Istanbul Byzantine fault tolerance for [J. P. Morgan
+  Quorum][quorum]
++ Raft is [being developed][raft] for Hyperledger Sawtooth
 
 
 # Unresolved questions
@@ -478,3 +491,9 @@ https://en.wikipedia.org/wiki/Byzantine_fault_tolerance#Byzantine_Generals'_Prob
 
 [consensus_engine]:
 https://github.com/aludvik/sawtooth-rfcs/blob/500b3688acfb0cd4834ea6451a8c5e000f7f5174/text/0000-consensus-api.md
+
+[raft]: https://github.com/hyperledger/sawtooth-raft
+
+[ethereum]: https://github.com/ethereum/EIPs/issues/650
+
+[quorum]: https://github.com/jpmorganchase/quorum/tree/master/consensus/istanbul
