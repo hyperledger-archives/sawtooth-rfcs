@@ -144,8 +144,8 @@ merged into the RFC repository as a markdown file. At that point the RFC is
     - Before actually entering FCP, *all* members of the subteam must sign off;
     this is often the point at which many subteam members first review the RFC
     in full depth.
-  - The FCP lasts ten calendar days, so that it is open for at least 5 business
-    days. It is also advertised widely, e.g. in [Sawtooth Mailing
+  - The FCP lasts one week, or seven calendar days. It is also advertised
+    widely, e.g. in [Sawtooth Mailing
     List](https://lists.hyperledger.org/mailman/listinfo/hyperledger-stl). This
     way all stakeholders have a chance to lodge any final objections before
     a decision is reached.
