@@ -1,6 +1,6 @@
 - Feature Name: supply_chain_expand_data_types
 - Start Date: 2018-03-08
-- RFC PR:
+- RFC PR: [hyperledger/sawtooth-rfcs#13](https://github.com/hyperledger/sawtooth-rfcs/pull/13)
 - Sawtooth Issue:
 
 # Summary
