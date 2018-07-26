@@ -1,6 +1,6 @@
 - Feature Name: supply_chain_universal_client
 - Start Date: 2018-12-03
-- RFC PR:
+- RFC PR: [hyperledger/sawtooth-rfcs#14](https://github.com/hyperledger/sawtooth-rfcs/pull/14)
 - Sawtooth Issue:
 
 # Summary
