@@ -7,9 +7,10 @@
 [summary]: #summary
 This RFC describes a practical Byzantine fault tolerant (PBFT) consensus
 algorithm for Hyperledger Sawtooth. The algorithm uses the Consensus API
-described in [a pending Sawtooth RFC][consensus_engine], and is adapted for
-blockchain use from a 1999 paper by Miguel Castro and Barbara Liskov
-[[1]](#references).
+described in [a pending Sawtooth
+RFC](https://github.com/aludvik/sawtooth-rfcs/blob/500b3688acfb0cd4834ea6451a8c5e000f7f5174/text/0000-consensus-api.md),
+and is adapted for blockchain use from a 1999 paper by Miguel Castro and
+Barbara Liskov [[1]](#references).
 
 
 # Motivation
@@ -33,9 +34,10 @@ number of inter-node communication steps required.
 
 ## The Byzantine Generals Problem
 Malicious users and code bugs can cause nodes in a network to exhibit
-[arbitrary (Byzantine) behavior][byzantine_behavior] [[1]](#references).
-Byzantine behavior can be described by nodes that send conflicting information
-to other nodes in the network [[2]](#references).
+[arbitrary (Byzantine)
+behavior](https://en.wikipedia.org/wiki/Byzantine_fault_tolerance#Byzantine_Generals'_Problem)
+[[1]](#references).  Byzantine behavior can be described by nodes that send
+conflicting information to other nodes in the network [[2]](#references).
 
 **Example:**
 Consider a scenario where there is a binary decision to be made: "to be" or
@@ -94,16 +96,18 @@ step-by-step walkthrough of this.
 | Low water mark    | The sequence number of the last stable checkpoint. |
 | High water mark   | Low water mark plus the desired maximum size of nodes' message logs. |
 | View              | The scope of PBFT when the current primary is in charge. The view changes when the primary is deemed faulty, as described in [View Changes](#view-changes). |
-| n                 | The total number of nodes in the network. |
-| f                 | The maximum number of faulty nodes. |
-| v                 | The current view number. |
-| p                 | The primary server number; p = v mod n. |
+| `n`               | The total number of nodes in the network. |
+| `f`               | The maximum number of faulty nodes. |
+| `v`               | The current view number. |
+| `p`               | The primary server number; `p = v mod n`. |
 
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 The PBFT consensus algorithm is written in Rust, and implements the `Engine`
-trait described in [the Consensus API][consensus_engine] [[3]](#references).
+trait described in [the Consensus
+API](https://github.com/aludvik/sawtooth-rfcs/blob/500b3688acfb0cd4834ea6451a8c5e000f7f5174/text/0000-consensus-api.md)
+[[3]](#references).
 
 ## Data Structures
 
@@ -263,7 +267,7 @@ Every node will keep track of the following state information:
 
 + Which step of the algorithm it's on
 
-+ Mode of operation (Normal, ViewChange, Checkpointing)
++ Mode of operation (`Normal`, `ViewChanging`, `Checkpointing`)
 
 + The maximum number of faulty nodes allowed in the network
 
@@ -301,18 +305,74 @@ predicates here.
 + `PrePrepare`: Sent from primary node to all nodes in the network, notifying
 them that a new message (`BlockNew`) has been received from the validator.
 
-+ `Prepare`: Broadcast from every node once a PrePrepare is received for the
-  current working block; used as verification of the PrePrepare message, and
++ `Prepare`: Broadcast from every node once a `PrePrepare` is received for the
+  current working block; used as verification of the `PrePrepare` message, and
   to signify that the block is ready to be checked.
 
-+ `Commit`: Broadcast from every node once a BlockValid is received for the
-  current working block; used to determine if there is consensus that nodes
-  should indeed commit the block contained in the original message.
++ `Commit`: Broadcast from every node once a `BlockValid` update is received
+  for the current working block; used to determine if there is consensus that
+  nodes should indeed commit the block contained in the original message.
 
 + `Checkpoint`: Sent by any node that has completed `checkpoint_period`
   `Commit` messages.
 
 + `ViewChange`: Sent by any node that suspects that the primary node is faulty.
+
+#### States
+**States:** PBFT follows a state-machine replication pattern, where these
+states are defined:
+
++ `NotStarted`: The algorithm has not been started yet. No `BlockNew` updates
+  have been received. In this stage, `Checkpointing` will occur if
+  `checkpoint_period` blocks have been committed to the chain. Ready to
+  receive a `BlockNew` update for the next block.
+
++ `PrePreparing`: A `BlockNew` has been received through the Consensus API,
+  and its Consensus Seal has been verified. Ready to receive a `PrePrepare`
+  message for the block corresponding to the `BlockNew` message just received.
+
++ `Preparing`: A `PrePrepare` message has been received and is valid. Ready to
+  receive `Prepare` messages corresponding to this `PrePrepare`.
+
++ `Checking`: The predicate `prepared` is true; meaning this node has a
+  `BlockNew`, a `PrePrepare`, and `2f + 1` corresponding `Prepare` messages.
+  Ready to receive a `BlockValid` update.
+
++ `Committing`: A `BlockValid` has been received. Ready to receive `Commit`
+  messages.
+
++ `Finished`: The predicate `committed` is true and the block has been
+  committed to the chain. Ready to receive a `BlockCommit` update.
+
+These states may be interrupted at any time if the view change timer expires,
+forcing the node into `ViewChanging` mode.
+
+
+**State Transitions:** The following state transitions are defined; listed
+with their causes:
+
++ `NotStarted` &rarr; `PrePreparing`: Receive a `BlockNew` update for the next
+  block.
+
++ `PrePreparing` &rarr; `Preparing`: Receive a `PrePrepare` message
+  corresponding to the `BlockNew`.
+
++ `Preparing` &rarr; `Checking`: `prepared` predicate is true.
+
++ `Checking` &rarr; `Committing`: Receive a `BlockValid` update corresponding
+  to the current working block.
+
++ `Committing` &rarr; `Finished`: `committed` predicate is true.
+
++ `Finished` &rarr; `NotStarted`: Receive a `BlockCommit` update for the
+  current working block.
+
+
+The states, state transitions, and actions that the algorithm takes are
+represented in the following diagram:
+
+![PBFT states](../images/pbft_states.png)
+
 
 #### Initialization
 At the beginning of the Engine's `start` method, some initial setup is
@@ -322,7 +382,7 @@ required:
   which are loaded from the on-chain settings
 
 #### Event Loop
-In a normal context (when the primary node is not faulty), the PBFT consensus
+In `Normal` mode (when the primary node is not faulty), the PBFT consensus
 algorithm operates as follows, inside the event loop of the `start` method:
 
 1. Receive a `BlockNew` message from the Consensus API, representative of
@@ -375,11 +435,6 @@ algorithm operates as follows, inside the event loop of the `start` method:
    This in turn sends out a `BlockNew` update to the network, starting the
    next cycle of the algorithm.
 
-Messages passed during normal operation are roughly described by the following
-diagram:
-
-![PBFT operation](../images/pbft_sawtooth.png)
-
 ### View Changes
 [view-changes]: #view-changes
 Sometimes, the node currently in charge (the primary) becomes faulty. This
@@ -398,29 +453,26 @@ The view change process is as follows:
 1. Any node who discovers the primary as faulty (whose timer timed out) sends
    a `ViewChange` message to all nodes, containing the node's current
    sequence number, its current view, proof of the previous checkpoint, and
-   pending messages that have happened since that previous checkpoint.
+   pending messages that have happened since that previous checkpoint. The
+   node enters `ViewChanging` mode.
 
 2. Once a server receives `2f + 1` `ViewChange` messages (including its own),
-   it changes its own view to `v + 1`. The new primary node's ID is `p = v mod
-   n`.
-
-Messages passed during a view change operation are shown in the following
-diagram:
-
-![PBFT View Changes](../images/pbft_view_change.png)
+   it changes its own view to `v + 1`, and resumes `Normal` operation. The new
+   primary node's ID is `p = v mod n`.
 
 ### Garbage Collection
 [garbage-collection]: #garbage-collection
 After each *checkpoint period* (around 100 successfully completed cycles of
 the algorithm), server log messages can possibly be garbage-collected. When
-each node reaches a checkpoint, it sends out a `Checkpoint` message to all of
-the other servers, with that node's current state (described by a
-`PbftBlock`).  When the current node has `2f + 1` matching `Checkpoint`
-messages from different servers, the checkpoint is considered *stable* and the
-logs can be garbage collected: All log entries with sequence number less than
-the one in the `Checkpoint` message are discarded, and all previous
-checkpoints are removed. The high and low water marks are updated to reflect
-the sequence number of the new stable checkpoint.
+each node reaches a checkpoint, it enters `Checkpointing` mode and sends out a
+`Checkpoint` message to all of the other servers, with that node's current
+state (described by a `PbftBlock`). When the current node has `2f + 1`
+matching `Checkpoint` messages from different servers, the checkpoint is
+considered *stable* and the logs can be garbage collected: All log entries
+with sequence number less than the one in the `Checkpoint` message are
+discarded, and all previous checkpoints are removed. The high and low water
+marks are updated to reflect the sequence number of the new stable checkpoint.
+Once garbage collection is complete, the node resumes `Normal` operation.
 
 
 # Drawbacks
@@ -471,11 +523,17 @@ strategies employed by this RFC apply to PBFT's derivations as well.
 + A PBFT consensus algorithm is [under
   development](https://github.com/hyperledger/fabric/tree/release-1.1/orderer)
   at [Hyperledger Fabric](https://www.hyperledger.org/projects/fabric)
+
 + There is an open Ethereum Improvement Proposal for Istanbul Byzantine fault
-  tolerance in [Ethereum][ethereum]
+  tolerance in [Ethereum](https://github.com/ethereum/EIPs/issues/650)
+
 + There is an implementation of Istanbul Byzantine fault tolerance for [J. P.
-  Morgan Quorum][quorum]
-+ Raft is [being developed][raft] for Hyperledger Sawtooth
+  Morgan
+  Quorum](https://github.com/jpmorganchase/quorum/tree/master/consensus/istanbul)
+
++ Raft is [being developed](https://github.com/hyperledger/sawtooth-raft) for
+  Hyperledger Sawtooth
+
 + There's an implementation of MinBFT [being
   developed](https://github.com/nec-blockchain/minbft) for NEC blockchain
 
@@ -514,15 +572,3 @@ _ACM SIGOPS Operating Systems Review_, 41(6),
 [[6] G. Veronese et al. Efficient Byzantine Fault Tolerance. _IEEE Transactions
 on Computers_, 62(1),
 2013.](http://homepages.gsd.inesc-id.pt/~mpc/pubs/Veronese-Efficient%20Byzantine%20Fault%20Tolerance.pdf)
-
-[byzantine_behavior]:
-https://en.wikipedia.org/wiki/Byzantine_fault_tolerance#Byzantine_Generals'_Problem
-
-[consensus_engine]:
-https://github.com/aludvik/sawtooth-rfcs/blob/500b3688acfb0cd4834ea6451a8c5e000f7f5174/text/0000-consensus-api.md
-
-[raft]: https://github.com/hyperledger/sawtooth-raft
-
-[ethereum]: https://github.com/ethereum/EIPs/issues/650
-
-[quorum]: https://github.com/jpmorganchase/quorum/tree/master/consensus/istanbul
