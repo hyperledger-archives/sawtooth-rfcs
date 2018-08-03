@@ -1,36 +1,26 @@
-- Feature Name: (fill me in with a unique identifier, my_awesome_feature)
-- Start Date: (fill me in with today's date, YYYY-MM-DD)
-- RFC PR: (leave this empty)
-- Sawtooth Issue: (leave this empty)
+- Feature Name: send_serialize_txn
+- Start Date: 2018-08-03
+- RFC PR:
+- Sawtooth Issue:
 
 # Summary
 [summary]: #summary
 
-One paragraph explanation of the feature.
+Requesting to add API to the sdk - txn.get_serialized_header(), that will return the header bytes.
 
 # Motivation
 [motivation]: #motivation
 
-Why are we doing this? What use cases does it support? What is the expected
-outcome?
+For security reasons transaction processor would like to verify the incoming transaction header, and signature.
+For example, in the private ledger TP (C++) that runs inside SGX enclave, we can't trust the signature verrification done by sawtooth since it happens outside of SGX.
+In order to verify the transaction signature, TP needs to get the serialized transaction header and not just all the fields.
+
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-Explain the proposal as if it was already included in Sawtooth and you were
-teaching it to another Sawtooth programmer. That generally means:
-
-- Introducing new named concepts.
-- Explaining the feature largely in terms of examples.
-- Explaining how Sawtooth programmers should *think* about the feature, and how
-  it should impact the way they use Sawtooth. It should explain the impact as
-  concretely as possible.
-- If applicable, provide sample error messages, deprecation warnings, or
-  migration guidance.
-- If applicable, describe the differences between teaching this to existing
-  Sawtooth programmers and new Sawtooth programmers.
-- If applicable, describe any changes that may affect the security of
-  communications or administration.
+Sawtooth is using protobuf to serialize and de-serialize transaction, sdk provide the de-serialized transaction to TP with access to transaction fields.
+This will provide TP developers to access the transaction header bytes.
 
 For implementation-oriented RFCs (e.g. for validator internals), this section
 should focus on how contributors should think about the change, and give
@@ -41,12 +31,11 @@ concrete terms.
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-This is the technical portion of the RFC. Explain the design in sufficient
-detail that:
-
-- Its interaction with other features is clear.
-- It is reasonably clear how the feature would be implemented.
-- Corner cases are dissected by example.
+there are several ways to implement this api.
+first and most simple, txn object that arrives to TP in 'apply' method will have an api to re-serialized transaction header.
+this solution could be problematic since it requires trust in protobuf that de-serializing and re-serializing back will produce same bytes.
+the other solution is for validator to forward the serialized header bytes to the transaction object, now calling the new get_serialized_header() will provide the bytes without the need to re-serialize.
+for the second solution, there is also an option to add flag to TP registration in order to let TP decide if it requires this API.
 
 The section should return to the examples given in the previous section, and
 explain more fully how the detailed proposal makes those examples work.
