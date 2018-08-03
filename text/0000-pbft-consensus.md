@@ -474,6 +474,61 @@ discarded, and all previous checkpoints are removed. The high and low water
 marks are updated to reflect the sequence number of the new stable checkpoint.
 Once garbage collection is complete, the node resumes `Normal` operation.
 
+### Dynamic Networking
+Dynamic networks are partially supported in this implementation of PBFT. Due to
+a current limitation in the Sawtooth Validator, only dynamic connecting is
+supported, not dynamic disconnecting.
+
+**Adding a peer:**
++ The first node on the network is the primary.
++ Every node starts out in `Connecting` mode; no updates besides `PeerConnected`
+  and `PeerDisconnected` are processed. When each connection message is received,
+  every node starts a `ViewChange` timer.
++ Once the primary node has enough peers to be Byzantine fault tolerant, then it
+  broadcasts a tentative `PbftNetworkChange` message. Other nodes receive this
+  message, and verify that the peers contained in the message are the same as the
+  ones in its peer list. Once this is verified, the node broadcasts a final
+  `PbftNetworkChange` with that peer list.
++ Upon receipt of `2f + 1` `PbftNetworkChange` messages, the node accepts the
+  peer list contained in the message, and updates its view, and sequence number
+  based on those in the message information. It stops the `ViewChange` timer,
+  and enters `Normal` execution mode.
++ If this node's chain head is behind the chain head from the message, then it
+  begins the process of committing all the blocks between its head and the
+  primary's chain head. These blocks do not need to undergo consensus again;
+  they're on the chain, and thus are final.
+
+**Removing a peer:**  (not currently supported by Sawtooth Validator)
++ Peer is removed from this node's local peer list
++ If this change makes the network no longer byzantine fault tolerant, then the
+  node re-enters `Connecting` mode and waits for another connection. If the
+  network is in the middle of a block consensus process, it is paused until the
+  network has come to consensus on this network change.
++ Primary sends out a tentative `PbftNetworkChange`, and a similar process to
+  **Adding a peer** is executed.
+
+**Message type:**
+```
+// Represents the current state of the network, including the active nodes,
+// and the current block.
+message PbftNetworkChange {
+  // The peers in this network configuration
+  repeated bytes peers = 1;
+
+  // The current block that the network is on - used to help nodes catch back
+  // up to the current chain head after they've been offline
+  PbftBlock head = 2;
+
+  // Does this message represent a tentative configuration, or a final
+  // configuration?
+  bool tentative = 3;
+
+  bytes signer_id = 4;
+
+  PbftMessageInfo info = 5;
+}
+```
+
 
 # Drawbacks
 [drawbacks]: #drawbacks
