@@ -392,7 +392,7 @@ was rejected due to the extra complexity involved in managing that service.
 # Prior art
 [prior-art]: #prior-art
 
-This RFC borrows many elements from these two JSON-RPC API extensions:
+This RFC conforms to many elements from these two JSON-RPC API extensions:
 
 https://wiki.parity.io/JSONRPC
 
