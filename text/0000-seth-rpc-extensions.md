@@ -73,12 +73,6 @@ will be extended to allow an argument that sets the list of inputs and outputs
 to be the entire Sawtooth Seth address space, enabling general contract
 chaining.
 
-## Account Info
-
-There will be one additional endpoint added that is not borrowed from an
-existing JSON-RPC API extension. The `seth_accountInfo` endpoint will be added
-for retrieving general metadata about an account.
-
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
@@ -90,7 +84,6 @@ for retrieving general metadata about an account.
 - [personal_importRawKey](#personal_importrawkey)
 - [seth_getPermissions](#seth_getpermissions)
 - [seth_setPermissions](#seth_setpermissions)
-- [seth_accountInfo](#seth_accountinfo)
 
 ### personal_listAccounts
 
@@ -312,56 +305,6 @@ Response
   "id": 1,
   "jsonrpc": "2.0",
   "result": true
-}
-```
-
-***
-
-
-### seth_accountInfo
-
-Retrieves information about the given account
-
-#### Parameters
-
-0. `Address` - 20 Bytes - The address of the account to set permissions for.
-
-```js
-params: [
-  "0xa3c8e0624a37ff89025d117735e3bdd7c980cf64",
-]
-```
-
-#### Returns
-
-0. `Object` - The transaction object
-    - `balance`: `Quantity` - Integer value of the current balance
-    - `code`: `Data` - The code, if any
-    - `nonce`: `Quantity` The current nonce
-    - `permissions`: `Data` - The permissions for the given address
-    - `storage`: `Object` - Object representing storage locations and their values
-
-#### Example
-
-Request
-```bash
-curl --data '{"method":"seth_setPermissions","params":["0xa3c8e0624a37ff89025d117735e3bdd7c980cf64"],"id":1,"jsonrpc":"2.0"}' -H "Content-Type: application/json" -X POST localhost:3030
-```
-
-Response
-```js
-{
-  "id": 1,
-  "jsonrpc": "2.0",
-  "result": {
-    "balance": "0x1F",
-    "code": "0x6080604052600080fd00a165627a7a7230582002c1a5df80de3378e111ca9f42fb94",
-    "nonce": "0x5",
-    "permissions": "-root,+send,+call,+contract,+account",
-    "storage": {
-        "0000000000000000000000000000000000000000000000000000000000000000": "0000000000000000000000000000000000000000000000000000000000000000",
-    },
-  }
 }
 ```
 
