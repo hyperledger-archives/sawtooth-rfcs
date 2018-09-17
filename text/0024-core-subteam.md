@@ -1,7 +1,7 @@
 - Feature Name: core_subteam
 - Start Date: 2018-08-30
-- RFC PR:
-- Sawtooth Issue:
+- RFC PR: [hyperledger/sawtooth-rfcs#24](https://github.com/hyperledger/sawtooth-rfcs/pull/24)
+- Sawtooth Issue: N/A
 
 # Summary
 [summary]: #summary
