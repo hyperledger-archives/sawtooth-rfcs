@@ -131,7 +131,8 @@ therefore requires read access to a PoET specific namespace.
 
 The Consensus Engine interface and implementations of the interface should be
 reusable in other applications. Specifically, the interface should support
-non-blockchain applications.
+non-blockchain applications, such as distributed oracles and distributed
+ledgers not focused around blocks.
 
 ## Data Structures
 
@@ -144,10 +145,12 @@ relevant to consensus. When used outside the blockchain context, the
 interpretation of this data structure is context dependent.
 
     Block {
-        Id: string
-        Previous Id: string
-        Index: unsigned integer
-        Consensus: bytes
+        Id: string               // This block's identifier
+        Previous Id: string      // This block's parent's identifier
+        Index: unsigned integer  // The "height" of this block
+        Consensus: bytes         // The opaque consensus payload for this block
+        Signer: bytes            // The signer of this block
+        Summary: bytes           // A digest of the contents of the block
     }
 
 **Consensus Messages**
@@ -166,28 +169,33 @@ MessageType is left to the Consensus Engine implementation.
 
 ## API
 
-The Consensus Engine API below is presented as a set of methods in order to
-simplify their presentation and explanation. Each method is implemented with a
-pair of (Request, Response) messages and the Consensus Proxy is responsible for
-handling this transformation within the Validator.
+The Consensus Engine API is split into two types of interactions between the
+Validator and the Consensus Engine implementation: services and updates. The
+Validator provides a set of _services_ to the Consensus Engine which are pairs
+of (Request, Response) messages that allow the Engine to get information from
+the Validator and send commands to the Validator. These service calls are
+synchronous and on-demand. The Validator also provides _updates_ to the Engine,
+which alert the Engine of new events that have occurred. Updates are sent
+asynchronously as they occur.
 
-The methods presented below are only meant to describe roughly what the
-high-level interactions between the Consensus Engine and the Validator will be.
-The names, parameters, and exact behavior of these methods are subject to
-change based on additional constraints and requirements discovered during
-implementation.
+Below is a listing of the services and updates defined by the Consensus Engine
+API. Each service is implemented with a pair of (Request, Response) messages
+and the Consensus Proxy is responsible for handling this transformation within
+the Validator. Each update is implemented as a single Notification message and
+the Consensus Notifier is responsible for creating and sending these messages
+at the request of the Validator internals.
 
-The methods defined by the Consensus Engine interface are split into the
+### Services
+
+The services defined by the Consensus Engine interface are split into the
 following groups:
 
 1. P2P Messaging
-2. Event Handlers
-3. Block Creation
-4. Block Management
-5. Queries
-6. Engine
+2. Block Creation
+3. Block Management
+4. Queries
 
-### P2P Messaging Methods
+#### P2P Messaging Methods
 The following methods are provided to Consensus Engines for sending consensus
 messages to other nodes on the network. These methods support R1.
 
@@ -196,37 +204,29 @@ messages to other nodes on the network. These methods support R1.
 | SendTo(peer, message) | Send a consensus message to a specific, connected peer |
 | Broadcast(message) | Broadcast a message to all peers |
 
-### Event Handlers
-The following methods will be implemented by Consensus Engines. They are used
-to update the Consensus Engine on external events. These methods support R1-R3.
-
-| Method | Description |
-| --- | --- |
-| OnMessageReceived(message) | Called when a new consensus message is received |
-| OnNewBlockReceived(block) | Called when a new block is received and validated |
-| OnAddPeer(peer) | Called when a new peer is added |
-| OnDropPeer(peer) | Called when a peer is dropped |
-
-### Block Creation Methods
+#### Block Creation Methods
 The following methods will be provided to Consensus Engines for controlling
 block creation. These methods support R3.
 
 | Method | Description |
 | --- | --- |
 | InitializeBlock() |  Initialize a new block based on the current chain head and start adding batches to it. |
-| FinalizeBlock(data) -> block_id | Stop adding batches to the current block and finalize it. Include the given consensus data in the block. If this call is successful, OnNewBlockReceived() will be called with the block. |
+| SummarizeBlock() -> digest |  Stop adding to the current block and summarize the contents of the block with a digest.  |
+| FinalizeBlock(data) -> block_id | Stop adding batches to the current block and finalize it. Include the given consensus data in the block. If this call is successful, a BlockNew update will be received with the new block. |
 | CancelBlock() |  Stop adding batches to the current block and abandon it. |
 
-### Block Management Methods
+#### Block Management Methods
 The following methods will be provided to Consensus Engines for controlling
 chain updates. These methods support R3.
 
 | Method | Description |
 | --- | --- |
-| CommitBlock(block_id) | Set the chain head to the given block id. The Chain Controller would handle the details here. |
-| DropBlock(block_id) | Remove the given block from the system. The main purpose of this method is to allow the Consensus Engine to notify the rest of the system that a block is invalid from the perspective of consensus. |
+| FailBlock(block_id) | Mark the block as failed by consensus. This will also fail all descendants. |
+| IgnoreBlock(block_id) | Mark the block as considered, but do not fail or commit the block. |
+| CheckBlocks(blocks) | Check that the blocks can be successfully committed. The results of all checks will be send as BlockValid and BlockInvalid updates. |
+| CommitBlock(block_id) | Set the chain head to the given block id. The Chain Controller would handle the details here. This block must already have been checked. |
 
-### Query Methods
+#### Query Methods
 The following methods will be provided to Consensus Engines for getting
 information from the validator.
 
@@ -235,20 +235,52 @@ information from the validator.
 | GetSetting(setting) -> data | Read the current value of the setting. Supports R4. |
 | GetState(address) -> data | This is needed to read values from arbitrary addresses used by consensus (eg., validator registry). Supports R5. |
 | GetBlock(block_id) -> block | Retrieve consensus-related information about a block. |
+| GetChainHead() -> block | Get the current committed chain head. |
 
 While the consensus engine should maintain a cache of blocks internally, this method is provided to:
 1. Allow cache entries to expire without losing the block forever
 2. Allow the engine to handle getting a block before its parent
 
-### Engine Methods
-The following methods will be implemented by Consensus Engines. They are used
-to initialize and shutdown the engine, when a new validator starts up, or when
-the consensus engine changes.
+### Updates
+
+The following updates are sent to Consensus Engines by the validator as they
+happen. They are used to update the Consensus Engine on external events. These
+methods support R1-R3.
 
 | Method | Description |
 | --- | --- |
-| Startup() | Startup and synchronize with any peers if necessary. |
-| Shutdown() | Shutdown and notify peers if necessary. |
+| PeerConnected(peer_info) | Called when a new peer is added |
+| PeerDisconnected(peer_id) | Called when a peer is dropped |
+| PeerMessage(message) | Called when a new consensus message is received |
+| BlockNew(block) | Called when a new block is received and validated |
+| BlockValid(block_id) | Called when a block check succeeds |
+| BlockInvalid(block_id) | Called when a block check fails |
+| BlockInvalid(block_id) | Called when a block commit completes |
+
+### API Contracts
+
+A few expectations, or _contracts_, are part of this API and must be upheld by
+both sides of the API in order for it to function correctly. These _contracts_
+are defined below:
+
+1. Following successful registration, `BlockNew` updates will only be sent to
+   the Consensus Engine by the Validator if the block's parent has already been
+   sent.
+
+2. The Consensus Engine must "render an opinion" on every block sent to it by the
+   validator by calling either `FailBlock()`, `IgnoreBlock()`, or
+   `CommitBlock()`. If a Consensus Engine implementation does not uphold this
+   contract, the validator will hold onto blocks in memory indefinitely,
+   causing a memory leak.
+
+3. Before a block can be committed with `CommitBlock()` it must first be
+   checked with `CheckBlocks()`. Failing to check a block before committing
+   will result in an error. This is to enable internal optimizations within the
+   Validator such as lazily evaluating blocks after consensus has rendered an
+   opinion.
+
+4. The state of block construction within the Validator will not change without
+   a request from the Consensus Engine.
 
 ## Consensus Engine Architecture Integration
 The following describes the interactions between the consensus engine and the
@@ -271,6 +303,12 @@ rest of the Validator. This includes marshaling and unmarshaling messages from
 the Dispatcher, passing block notifications to the Consensus Engine, and
 passing commands from the Consensus Engine to the Chain Controller and Block
 Publisher.
+
+**Consensus Notifier**
+
+The Consensus Notifier handles marshaling and sending notifications to the
+Validator. It is passed to validator components that are responsible for
+sending notifications.
 
 **Block Validator**
 
@@ -299,10 +337,8 @@ to the Block Validator.
 # Rationale and alternatives
 [alternatives]: #alternatives
 
-- Why is this design the best in the space of possible designs?
-- What other designs have been considered and what is the rationale for not
-  choosing them?
-- What is the impact of not doing this?
+This design balances the existing architectural constraints of the validator
+against the desire for an abstract, uniform consensus interface.
 
 # Prior art
 [prior-art]: #prior-art
