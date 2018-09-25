@@ -1,4 +1,4 @@
-- Feature Name: send_serialize_txn
+- Feature Name: raw_txn_header
 - Start Date: 2018-08-03
 - RFC PR:
 - Sawtooth Issue:
@@ -6,18 +6,18 @@
 # Summary
 [summary]: #summary
 
-Requesting to add API to the sdk - txn.get_serialized_header(), that will return
+Requesting to add API to the sdk - txn.get_raw_header()(), that will return
 the transaction header bytes.
 
 # Motivation 
 [motivation]: #motivation
 
 For security reasons transaction processor would like to verify the incoming
-transaction header, and signature.  For example, in the private ledger TP (C++)
-that runs inside SGX enclave, we can't trust the signature verification done by
-sawtooth since it happens outside of SGX.  In order to verify the transaction
-signature, TP needs to get the serialized transaction header and not just all
-the fields.
+transaction header, and signature, if TP that runs inside SGX enclave, we 
+can't trust the signature verification done by sawtooth since it happens
+outside of SGX (TEE).
+In order to verify the transaction signature, TP needs to get the serialized
+transaction header and not just all the fields.
 
 
 # Guide-level explanation
@@ -33,16 +33,11 @@ should not cause any breakage for pre-existing transaction processors.
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-There are several ways to implement this api. First and most simple, txn object
-that arrives to TP in 'apply' method will have an api to re-serialize the
-transaction header. This solution could be problematic since it requires trust
-in protobuf that de-serializing and re-serializing back will produce same bytes.
-
-A more reliable soultion is for the validator to forward the serialized header
-bytes of the transaction object, now calling the new get_serialized_header()
-will provide the bytes without the need to re-serialize. For this recommended
-solution, there is also an option to add flag to TP registration in order to let
-TP decide if it requires this API.
+The validator to forward the serialized header bytes of the transaction
+object, now calling the new get_serialized_header() will provide the
+bytes without the need to re-serialize. 
+there is also an option to add flag to TP registration in order to let TP
+decide if it requires this API.
 
 A possible implementation approach would be to modify TpRegisterRequest to
 indicate that the transaction processor desires header bytes.
@@ -75,22 +70,34 @@ be filled in.
 # Drawbacks
 [drawbacks]: #drawbacks
 
-Most transaction processors do not need the raw header bytes.
-Enabling this feature may mean carrying extra data through the sawtooth-core
-internal pipeline.
+Adding this feature will increase the stable API surface for the benefit of a
+single transaction processor implementation. (Though in theory it could be 
+useful to other transaction processors in the future, we do not know of any
+plans.) The stable API is important because we have made a commitment of 
+backward support, so this feature, if added, will need to be supported into
+the future.
+
+This will also increase the complexity of the validator slightly.
 
 # Rationale and alternatives
 [alternatives]: #alternatives
 
-An alternative would be to include a signature within the payload itself. That
-has the downside of bloating the transactions with an additional redundant
-field.
+an alternative would be that txn object that arrives to TP in 'apply' method 
+will have an api to re-serialize the transaction header. 
+This solution could be problematic since it requires trust in protobuf that 
+de-serializing and re-serializing back will produce same bytes.
+
+An alternative would be to sign the payload itself. That has the downside of 
+bloating the transactions with an additional redundant field from the header.
 
 # Prior art [prior-art]: #prior-art
 
-This problem appears unique to the conjunction of the sawtooth architecture and
-the use of a trusted execution environment for the transaction handling logic.
+sawtooth 0.8 had had an API which sent the raw bytes, This API changed during
+1.0 stabilization to send the transaction payload as it is now
+Missing this API appears unique to the conjunction of the sawtooth
+architecture and the use of a trusted execution environment for the 
+transaction handling logic.
 
 # Unresolved questions [unresolved]: #unresolved-questions
 
-Internal sawtooth-core management of the header is not prescribed in this RFC.
+Internal validator management of the header is not prescribed in this RFC.
