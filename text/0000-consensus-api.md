@@ -33,7 +33,7 @@ this research came the following observations:
 
 These observations led to the creation of the _Consensus Engine_ abstraction,
 which can be used to implement any consensus algorithm that is either a
-_voting_ algorithm or a _lottery_ algorithm.
+_voting_ (classical) algorithm or a _lottery_ (Nakamoto-style) algorithm.
 
 ## Comparison of Algorithm Types
 
