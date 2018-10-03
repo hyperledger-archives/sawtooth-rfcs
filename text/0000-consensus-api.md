@@ -122,7 +122,7 @@ configuration using the Settings Transaction Family. PoET depends on Settings
 to configure critical values such as target wait time and enclave measurements
 and these values must be consistent across the network.
 
-**R5 - Read/Write Access to Global State**
+**R5 - Read Access to Global State**
 
 PoET depends on tracking authorized block publishers in global state and
 therefore requires read access to a PoET specific namespace.
