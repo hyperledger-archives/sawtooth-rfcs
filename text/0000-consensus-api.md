@@ -346,7 +346,7 @@ against the desire for an abstract, uniform consensus interface.
 This design borrows some ideas from the [Tendermint ABCI][tendermint] and the
 [Parity Consensus Engine][parity] interface.
 
-[tendermint]: https://tendermint.readthedocs.io/en/master/app-development.html#abci-design)
+[tendermint]: https://tendermint.com/docs/spec/abci/
 [parity]: https://github.com/paritytech/parity/blob/e95b09348386d01b71901365785c5fa3aa2f7a6d/ethcore/src/engines/mod.rs#L176
 
 # Unresolved questions
