@@ -1,7 +1,7 @@
 - Feature Name: supply_chain_property_references
 - Start Date: 2018-03-14
-- RFC PR:
-- Sawtooth Issue:
+- RFC PR: [hyperledger/sawtooth-rfcs#15](https://github.com/hyperledger/sawtooth-rfcs/pull/15)
+- Sawtooth Issue: N/A
 
 # Summary
 [summary]: #summary

@@ -1,7 +1,7 @@
 - Feature Name: pbft-consensus
 - Start Date: 2018-06-18
-- RFC PR: (leave this empty)
-- Sawtooth Issue: (leave this empty)
+- RFC PR: [hyperledger/sawtooth-rfcs#19](https://github.com/hyperledger/sawtooth-rfcs/pull/19)
+- Sawtooth Issue: N/A
 
 # Summary
 [summary]: #summary
