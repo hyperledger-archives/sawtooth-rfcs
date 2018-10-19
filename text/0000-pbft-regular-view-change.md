@@ -127,9 +127,9 @@ fair" and to start a new election if they determine the leader appears to be
 manipulating the order. The second was inspired by the proposed method for
 handling non-determinism in the original PBFT paper by Castro and Liskov.
 
-One example of a heuristic that prevents excluding batches indefinitely here:
-https://gist.github.com/aludvik/164a9c0a7419b758e54190c4a0dfa72b This solution
-is somewhat inspired by the PoET z-test.
+One example of a heuristic that prevents excluding batches indefinitely can be
+found here: https://gist.github.com/aludvik/164a9c0a7419b758e54190c4a0dfa72b
+This solution is somewhat inspired by the PoET z-test.
 
 For the second alternative, the relevant portion of the PBFT paper is section
 4.6 on non-determinism. (Paper found here:
@@ -161,5 +161,5 @@ to 1.
 - Should forced view changes be enabled by default? Should it be possible to
   turn them off?
 - To what extent do forced view changes affect performance?
-- How to guarantee all nodes have finished committing the in progress block
+- How to guarantee all nodes have finished committing the in-progress block
   before participating in the forced view change?
