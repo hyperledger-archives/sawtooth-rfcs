@@ -55,29 +55,31 @@ them.
 [guide-level-explanation]: #guide-level-explanation
 
 In order to mitigate the effects of the "unfair ordering" and "silent leader"
-problems, Sawtooth PBFT will force regular view changes.
+problems, Sawtooth PBFT will perform view changes in two new cases.
 
-Forcing regular view changes measured by the number of blocks committed
-mitigates the "unfair ordering" problem by giving every node a chance to be
-unfair for a period of blocks. This is inspired by how the Tendermint consensus
-algorithm handles the problem and how lottery-style algorithms handle the
-problem, where a new leader can be elected for every block.
+In the first case, regular view changes are forced based on the number of
+committed blocks. This mitigates the "unfair ordering" problem by giving every
+node a chance to be unfair for a period of blocks. This is inspired by how the
+Tendermint consensus algorithm handles the problem and how lottery-style
+algorithms handle the problem, where a new leader can be elected for every
+block.
 
-Forcing regular view changes while the network is idle mitigates the "silent
-orderer" problem by limiting the amount of time a faulty leader can stall the
-network.
+In the second case, nodes propose a view change when the network is idle for
+too long. This mitigates the "silent orderer" problem by limiting the amount of
+time a faulty leader can stall the network.
 
 The setting `sawtooth.consensus.pbft.forced_view_change_period` determines how
 often, measured in blocks, a view change should be forced. After transitioning
 from the Finished to NotStarted state, a node will check whether a view change
-should be forced and, if so, vote for one.
+should be forced and, if so, immediately change views. Specifically, the node
+will not perform a view change by proposing a view change and collecting votes.
 
 The setting `sawtooth.consensus.pbft.idle_timeout` is set to an integer and
 represents how long to wait in between committing a block and starting a round
 of consensus on a new block before starting a view change. After transitioning
-to the NotStarted state from any other state, if a node has not already started
-a view, the node will start a timer based on this setting and, if it expires
-before a new block is proposed, will vote for a view change.
+to the NotStarted state from any other state the node will start a timer based
+on this setting and, if it expires before a new block is proposed, will vote
+for a view change.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
@@ -87,24 +89,25 @@ from `sawtooth.consensus.pbft.forced_view_change_period` and t_idle := the time
 to wait between a block being committed and a new block being proposed before
 forcing a view change as read from `sawtooth.consensus.pbft.idle_timeout`.
 
-Regular, forced view changes occur only when the validator is in the NotStarted
-state. Let n_seq := the sequence number after transitioning to NotStarted.
-(Note that the sequence number is incremented at the same time as the block
-height and are identical except when PBFT is not the consensus engine used at
-genesis.) Immediately after transitioning to NotStarted, check if
+Regular, forced view changes occur only when the validator transitions from the
+Finished to the NotStarted state. Let n_seq := the sequence number after
+transitioning to NotStarted. (Note that the sequence number is incremented at
+the same time as the block height and are identical except when PBFT is not the
+consensus engine used at genesis.) Immediately after transitioning to
+NotStarted, the node will check if
 
     `n_seq % n_force == 0`
 
-and if true, force a view change.
+and if true, it will immediately change view.
 
-If a view change is not started by the above check, a timer is started which
+Whenever a node transitions to the NotStarted state, a timer is started which
 will expire after t_idle has passed. If this timer expires without a BlockNew
-update arriving, force a view change. A separate timer is used here instead of
-moving where the existing timer is started for two reasons. First, an idle
-network should not affect how long a network has to commit a block after
-proposing one. Second, it is desirable that the time a network has to commit a
-block and the time a network can remain idle before forcing a view change
-be independently configurable.
+update arriving, the node will propose a view change. A separate timer is used
+here instead of moving where the existing timer is started for two reasons.
+First, an idle network should not affect how long a network has to commit a
+block after proposing one. Second, it is desirable that the time a network has
+to commit a block and the time a network can remain idle before proposing a
+view change be independently configurable.
 
 # Drawbacks
 [drawbacks]: #drawbacks
