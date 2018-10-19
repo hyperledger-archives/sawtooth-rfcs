@@ -161,5 +161,3 @@ to 1.
 - Should forced view changes be enabled by default? Should it be possible to
   turn them off?
 - To what extent do forced view changes affect performance?
-- How to guarantee all nodes have finished committing the in-progress block
-  before participating in the forced view change?
