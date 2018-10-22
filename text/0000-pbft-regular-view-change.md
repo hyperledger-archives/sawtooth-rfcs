@@ -127,9 +127,30 @@ fair" and to start a new election if they determine the leader appears to be
 manipulating the order. The second was inspired by the proposed method for
 handling non-determinism in the original PBFT paper by Castro and Liskov.
 
-One example of a heuristic that prevents excluding batches indefinitely can be
-found here: https://gist.github.com/aludvik/164a9c0a7419b758e54190c4a0dfa72b
-This solution is somewhat inspired by the PoET z-test.
+The following is an example of the type of heuristic that could be used to
+prevent excluding batches indefinitely.
+
+1. When a batch arrives, add it to a queue and include a "skip count" and the
+   queue size when it was added
+2. When a block is committed, remove batches from the front of the queue until
+   all batches in the block have been removed. If a batch is not in the block,
+   increase its skip count and save it. Push all batches that were skipped back
+   onto the front of the queue, preserving the original order.
+3. While pushing batches back onto the queue, check that the batch isn't being
+   intentionally skipped by the validator:
+
+    a. Check if the skip count (S) is greater than the size of the queue when
+       it was added (q_add) divided by the average throughput (T_avg)
+
+          S > (q_add / T_avg)
+
+    b. T_avg = sum((batches / block) for last N blocks) / N
+
+4. If a batch is being intentionally skipped, consider the leader faulty and
+   propose a view change.
+
+Note: This doesn't prevent a bad leader from re-ordering batches, but does
+require that it include them eventually, even on a busy network.
 
 For the second alternative, the relevant portion of the PBFT paper is section
 4.6 on non-determinism. (Paper found here:
