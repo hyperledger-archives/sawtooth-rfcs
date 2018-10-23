@@ -102,6 +102,11 @@ it is finalized prevents a leader from finalizing a block before the previous
 block has been committed, which prevents an aggressive strategy of optimistic
 block publishing.
 
+Lastly, while it is possible for an observer to validate that a block commit is
+correct by checking the consensus seal of the next block, it is not possible
+for an observer to validate that the most recently committed block was
+correctly committed.
+
 # Rationale and alternatives
 [alternatives]: #alternatives
 
