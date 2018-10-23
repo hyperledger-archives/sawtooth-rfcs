@@ -106,10 +106,37 @@ block publishing.
 [alternatives]: #alternatives
 
 Other consensus algorithms have attempted to solve this problem by including
-the consensus seal in an optional, unsigned field along with the block.
-This provides the same guarantees as the above, except that the burden of
-producing the seal is distributed to all nodes and there is more than one valid
-seal per block. https://github.com/ethereum/EIPs/issues/650
+the consensus seal in an optional, unsigned field along with the block. (https://github.com/ethereum/EIPs/issues/650)
+This provides similar guarantees as above, but there are a number of drawbacks
+to this approach:
+
+1. The burden of producing the seal is distributed to all nodes
+2. There is more than one valid seal per block
+3. Requires adding a new field to the core Block type in Sawtooth
+4. Requires adding a new method to the consensus API to append data to an
+   existing block, which requires making blocks mutable in the validator
+5. Validators replaying the chain must either forego verification of the
+   consensus seal, or poll a node for its seals
+
+Another alternative considered was to perform consensus on the block contents
+prior to signing and publishing the block.
+
+1. Leader proposes "pre-block" containing (batch list, previous block, leader's
+   public key) to followers
+2. Followers, vote to commit the pre-block
+3. After receiving 2f+1 votes from the followers to commit, leader constructs
+   consensus seal described above, inserts into block consensus payload, signs
+   block, and publishes block.
+4. Followers receive block, are immediately able to verify 2f+1 votes to commit
+   because they are in the seal, and commit the block.
+
+At first this seems like an attractive alternative. However, in order for it to
+work, substantial changes would need to be made to the validator architecture
+to allow consensus engines to submit batches for validation that are not in a
+block and to notify consensus engines of batches. Another extension would also
+need to be added to recover from a network agreeing to commit a block, but that
+block never arriving due to either 1. an invalid signature or 2. the leader
+never actually publishing the block.
 
 # Prior art
 [prior-art]: #prior-art
