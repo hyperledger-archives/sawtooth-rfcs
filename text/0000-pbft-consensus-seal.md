@@ -85,11 +85,10 @@ seal, the node must:
 1. Verify the `previous_id` field in the seal matches the current block
 2. Verify the `summary` field matches the block's summary
 3. For each vote:
-
-    a. Verify the `header_signature` of each vote matches the
-       `signer_public_key` in the header
-    b. Verify the SHA512 digest of the `message` field matches the
-       `message_sha512` field in the header
+   1. Verify the `header_signature` of each vote matches the
+      `signer_public_key` in the header
+   2. Verify the SHA512 digest of the `message` field matches the
+      `message_sha512` field in the header
 
 
 # Drawbacks
