@@ -63,16 +63,6 @@ The existing `eth_sendTransaction` endpoint will be extended to allow a
 Finally, the proposed `personal_importRawKey` and `personal_newAccount`
 endpoints will accept a `permissions` argument as well.
 
-## Contract Chaining
-
-Sawtooth has the concept of a limited set of input and output address that a
-transaction is limited to reading from/writing to. That concept doesn't exist
-in Ethereum, and makes the concept of contract chaining (e.g. creating a
-contract from another contract) difficult. The `eth_sendTransaction` endpoint
-will be extended to allow an argument that sets the list of inputs and outputs
-to be the entire Sawtooth Seth address space, enabling general contract
-chaining.
-
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
