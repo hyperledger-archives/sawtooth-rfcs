@@ -148,7 +148,11 @@ Response
 
 Unlocks specified account for use.
 
-If permanent unlocking is disabled (the default) then the duration argument will be ignored, and the account will be unlocked for a single signing. With permanent locking enabled, the duration sets the number of seconds to hold the account open for. It will default to 300 seconds. Passing 0 unlocks the account indefinitely.
+If permanent unlocking is disabled (the default) then the duration argument
+will be ignored, and the account will be unlocked for a single signing. With
+permanent locking enabled, the duration sets the number of seconds to hold the
+account open for. It will default to 300 seconds. Passing 0 unlocks the account
+indefinitely.
 
 There can only be one unlocked account at a time.
 
