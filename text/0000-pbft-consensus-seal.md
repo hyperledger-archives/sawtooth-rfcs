@@ -79,17 +79,26 @@ serialized and included in the block's consensus payload field:
     }
 
 Before a new block can be finalized by the leader, a `PbftSeal` must be
-constructed with 2f+1 `PbftSignedCommitVote` messages included. Prior to
-followers committing a block, they must verify the `PbftSeal`. To verify the
-seal, the node must:
+constructed with 2f+1 `PbftSignedCommitVote` messages included for the previous
+block. Prior to followers committing a block, they must verify the `PbftSeal`.
+To verify the seal, the node must:
 
-1. Verify the `previous_id` field in the seal matches the current block
-2. Verify the `summary` field matches the block's summary
-3. For each vote:
-   1. Verify the `header_signature` of each vote matches the
-      `signer_public_key` in the header
-   2. Verify the SHA512 digest of the `message` field matches the
-      `message_sha512` field in the header
+1. Verify the `previous_id` field in the seal matches the `previous_id` field
+   in the block that the node is trying to commit
+2. Verify the `summary` field in the seal matches the `summary` field in the
+   block that the node is trying to commit
+3. Verify that all `ConsensusPeerMessageHeader.signer_id` fields are unique and
+   that they all correspond to public keys of nodes that were participating in
+   that block according to the `sawtooth.consensus.pbft.peers` field.
+4. For each vote:
+   1. Verify the signature of each `PbftSignedCommitVote` by checking that
+      `header_signature` is a valid signature over `header` using the private
+      key associated with the public key in the header,
+      `ConsensusPeerMessageHeader.signer_id`.
+   2. Verify that the SHA512 digest of the `PbftSignedCommitVote.message` field
+      matches the `ConsensusPeerMessageHeader.content_sha512` field. This
+   3. Verify that the `PbftMessage.block.block_id` field matches the
+      `PbftSeal.previous_id` field.
 
 
 # Drawbacks
