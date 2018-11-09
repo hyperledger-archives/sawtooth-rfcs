@@ -67,7 +67,8 @@ serialized and included in the block's consensus payload field:
       bytes header = 1;
       bytes header_signature = 2;
 
-      // Serialized ConsensusPeerMessage
+      // Serialized PbftMessage COMMIT message for the block with id equal to
+      // `previous_id` in the seal
       bytes message = 3;
     }
 
