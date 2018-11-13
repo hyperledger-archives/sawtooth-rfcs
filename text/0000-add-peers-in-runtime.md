@@ -107,6 +107,21 @@ message ClientAddPeersResponse {
 The rationale behind the `invalid_uris` is to be more precise about what is
 wrong and to ease the debugging process for developers.
 
+We should also add new message types to `protos/validator.proto`:
+
+```protobuf
+message Message {
+
+    enum MessageType {
+        // ...
+        CLIENT_PEERS_ADD_REQUEST = 131;
+        CLIENT_PEERS_ADD_RESPONSE = 132;
+        // ...
+    }
+    // ...
+}
+```
+
 ## How are the requests processed by the validator
 [request-processing]: #request-processing
 
