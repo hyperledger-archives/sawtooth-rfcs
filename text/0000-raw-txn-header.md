@@ -6,7 +6,7 @@
 # Summary
 [summary]: #summary
 
-Requesting to add API to the sdk - txn.get_raw_header()(), that will return
+Requesting to add API to the sdk - txn.get_raw_header(), that will return
 the transaction header bytes.
 
 # Motivation 
