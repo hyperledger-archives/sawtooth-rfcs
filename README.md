@@ -1,20 +1,20 @@
-# Sawtooth RFCs
-[Sawtooth RFCs]: #sawtooth-rfcs
+# Ursa RFCs
+[Ursa RFCs]: #ursa-rfcs
 
 Many changes, including bug fixes and documentation improvements can be
 implemented and reviewed via the normal GitHub pull request workflow.
 
 Some changes though are "substantial", and we ask that these be put through a
-bit of a design process and produce a consensus among the Sawtooth community and
+bit of a design process and produce a consensus among the Ursa community and
 the [sub-team]s.
 
 The "RFC" (request for comments) process is intended to provide a consistent
-and controlled path for major changes to enter Sawtooth Core and other official
+and controlled path for major changes to enter Ursa Core and other official
 project components, so that all stakeholders can be confident about the
-direction Sawtooth is evolving in.
+direction Ursa is evolving in.
 
 This process is intended to be substantially similar to the Rust RFCs process,
-customized as necessary for use with Sawtooth. The README.md and
+customized as necessary for use with Ursa. The README.md and
 0000-template.md were initially forked from [Rust
 RFCs](https://github.com/rust-lang/rfcs).
 
@@ -22,7 +22,7 @@ RFCs](https://github.com/rust-lang/rfcs).
 ## Table of Contents
 [Table of Contents]: #table-of-contents
 
-  - [Opening](#sawtooth-rfcs)
+  - [Opening](#ursa-rfcs)
   - [Table of Contents]
   - [When you need to follow this process]
   - [Before creating an RFC]
@@ -38,8 +38,8 @@ RFCs](https://github.com/rust-lang/rfcs).
 [When you need to follow this process]: #when-you-need-to-follow-this-process
 
 You need to follow this process if you intend to make "substantial" changes to
-Sawtooth or any of its sub-components including but not limited to Sawtooth
-Core, Sawtooth Supply Chain, Sawtooth Seth, the various Sawtooth SDKs, or the
+Ursa or any of its sub-components including but not limited to Ursa
+Core, Ursa Supply Chain, Ursa Seth, the various Ursa SDKs, or the
 RFC process itself. What constitutes a "substantial" change is evolving based
 on community norms and varies depending
 on what part of the ecosystem you are proposing to change, but may include the
@@ -67,7 +67,7 @@ the RFC process, it may be closed with a polite request to submit an RFC first.
 [Sub-team specific guidelines]: #sub-team-specific-guidelines
 
 For more details on when an RFC is required for the following areas, please see
-the Sawtooth community's [sub-team] specific guidelines for:
+the Ursa community's [sub-team] specific guidelines for:
 
 
   - [core changes](core_changes.md)
@@ -87,9 +87,9 @@ beforehand, to ascertain that the RFC may be desirable; having a consistent
 impact on the project requires concerted effort toward consensus-building.
 
 The most common preparations for writing and submitting an RFC include talking
-the idea over on [#sawtooth](https://chat.hyperledger.org/channel/sawtooth) and
-proposing ideas to the Hyperledger Sawtooth mailing list
-(https://lists.hyperledger.org/mailman/listinfo/hyperledger-stl).
+the idea over on [#ursa](https://chat.hyperledger.org/channel/ursa) and
+proposing ideas to the Hyperledger Ursa mailing list
+(https://lists.hyperledger.org/mailman/listinfo/hyperledger-ursa).
 
 As a rule of thumb, receiving encouraging feedback from long-standing project
 developers, and particularly members of the relevant [sub-team] is a good
@@ -99,9 +99,9 @@ indication that the RFC is worth pursuing.
 ## What the process is
 [What the process is]: #what-the-process-is
 
-In short, to get a major feature added to Sawtooth, one must first get the RFC
+In short, to get a major feature added to Ursa, one must first get the RFC
 merged into the RFC repository as a markdown file. At that point the RFC is
-"active" and may be implemented with the goal of eventual inclusion into Sawtooth.
+"active" and may be implemented with the goal of eventual inclusion into Ursa.
 
   - Fork the RFC repo [RFC repository]
   - Copy `0000-template.md` to `text/0000-my-feature.md` (where "my-feature" is
@@ -145,8 +145,8 @@ merged into the RFC repository as a markdown file. At that point the RFC is
     this is often the point at which many subteam members first review the RFC
     in full depth.
   - The FCP lasts one week, or seven calendar days. It is also advertised
-    widely, e.g. in [Sawtooth Mailing
-    List](https://lists.hyperledger.org/mailman/listinfo/hyperledger-stl). This
+    widely, e.g. in [Ursa Mailing
+    List](https://lists.hyperledger.org/mailman/listinfo/hyperledger-ursa). This
     way all stakeholders have a chance to lodge any final objections before
     a decision is reached.
   - In most cases, the FCP period is quiet, and the RFC is either merged or
@@ -157,14 +157,14 @@ merged into the RFC repository as a markdown file. At that point the RFC is
 [The RFC life-cycle]: #the-rfc-life-cycle
 
 Once an RFC becomes "active" then authors may implement it and submit the
-change as a pull request to the corresponding Sawtooth repo. Being "active" is not a rubber
+change as a pull request to the corresponding Ursa repo. Being "active" is not a rubber
 stamp, and in particular still does not mean the change will ultimately be
 merged; it does mean that in principle all the major stakeholders have agreed
 to the change and are amenable to merging it.
 
 Furthermore, the fact that a given RFC has been accepted and is "active"
 implies nothing about what priority is assigned to its implementation, nor does
-it imply anything about whether a Sawtooth developer has been assigned the task of
+it imply anything about whether a Ursa developer has been assigned the task of
 implementing the feature. While it is not *necessary* that the author of the
 RFC also write the implementation, it is by far the most effective way to see
 an RFC through to completion: authors should not expect that other project
@@ -205,9 +205,9 @@ rationale for the decision.
 Some accepted RFCs represent vital changes that need to be implemented right
 away. Other accepted RFCs can represent changes that can wait until some
 arbitrary developer feels like doing the work. Every accepted RFC has an
-associated issue tracking its implementation in the Sawtooth JIRA issue tracker; thus that
+associated issue tracking its implementation in the Ursa JIRA issue tracker; thus that
 associated issue can be assigned a priority via the triage process that the
-team uses for all issues related to Sawtooth.
+team uses for all issues related to Ursa.
 
 The author of an RFC is not obligated to implement it. Of course, the RFC
 author (like any other developer) is welcome to post an implementation for
@@ -226,9 +226,8 @@ circumstances. As usual, we are trying to let the process be driven by
 consensus and community norms, not impose more structure than necessary.
 
 
-[developer discussion forum]: https://chat.hyperledger.org/channel/sawtooth
-[RFC issue tracker]: https://jira.hyperledger.org/projects/STL/issues
-[RFC repository]: https://github.com/hyperledger/sawtooth-rfcs
+[developer discussion forum]: https://chat.hyperledger.org/channel/ursa
+[RFC repository]: https://github.com/hyperledger/ursa-rfcs
 
 
 ## License
