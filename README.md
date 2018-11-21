@@ -5,8 +5,7 @@ Many changes, including bug fixes and documentation improvements can be
 implemented and reviewed via the normal GitHub pull request workflow.
 
 Some changes though are "substantial", and we ask that these be put through a
-bit of a design process and produce a consensus among the Ursa community and
-the [sub-team]s.
+bit of a design process and produce a consensus among the Ursa community.
 
 The "RFC" (request for comments) process is intended to provide a consistent
 and controlled path for major changes to enter Ursa Core and other official
@@ -62,16 +61,6 @@ Some changes do not require an RFC:
 If you submit a pull request to implement a new feature without going through
 the RFC process, it may be closed with a polite request to submit an RFC first.
 
-
-### Sub-team specific guidelines
-[Sub-team specific guidelines]: #sub-team-specific-guidelines
-
-For more details on when an RFC is required for the following areas, please see
-the Ursa community's [sub-team] specific guidelines for:
-
-
-  - [core changes](core_changes.md)
-
 ## Before creating an RFC
 [Before creating an RFC]: #before-creating-an-rfc
 
@@ -92,7 +81,7 @@ proposing ideas to the Hyperledger Ursa mailing list
 (https://lists.hyperledger.org/mailman/listinfo/hyperledger-ursa).
 
 As a rule of thumb, receiving encouraging feedback from long-standing project
-developers, and particularly members of the relevant [sub-team] is a good
+developers, and particularly maintainers is a good
 indication that the RFC is worth pursuing.
 
 
@@ -117,7 +106,7 @@ merged into the RFC repository as a markdown file. At that point the RFC is
     much more likely to make progress than those that don't receive any
     comments. Feel free to reach out to the RFC assignee in particular to get
     help identifying stakeholders and obstacles.
-  - The sub-team will discuss the RFC pull request, as much as possible in the
+  - Maintainers will discuss the RFC pull request, as much as possible in the
     comment thread of the pull request itself. Offline discussion will be
     summarized on the pull request comment thread.
   - RFCs rarely go through this process unchanged, especially as alternatives
@@ -126,23 +115,23 @@ merged into the RFC repository as a markdown file. At that point the RFC is
     request, and leave a comment on the pull request explaining your changes.
     Specifically, do not squash or rebase commits after they are visible on the
     pull request.
-  - At some point, a member of the subteam will propose a "motion for final
+  - At some point, a maintainer will propose a "motion for final
     comment period" (FCP), along with a *disposition* for the RFC (merge, close,
     or postpone).
     - This step is taken when enough of the tradeoffs have been discussed that
-    the subteam is in a position to make a decision. That does not require
+    the maintainers are in a position to make a decision. That does not require
     consensus amongst all participants in the RFC thread (which is usually
     impossible). However, the argument supporting the disposition on the RFC
     needs to have already been clearly articulated, and there should not be a
-    strong consensus *against* that position outside of the subteam. Subteam
-    members use their best judgment in taking this step, and the FCP itself
+    strong consensus *against* that position outside of the maintainers. 
+    Maintainers use their best judgment in taking this step, and the FCP itself
     ensures there is ample time and notification for stakeholders to push back
     if it is made prematurely.
     - For RFCs with lengthy discussion, the motion to FCP is usually preceded by
       a *summary comment* trying to lay out the current state of the discussion
       and major trade-offs/points of disagreement.
-    - Before actually entering FCP, *all* members of the subteam must sign off;
-    this is often the point at which many subteam members first review the RFC
+    - Before actually entering FCP, *all* maintainers must sign off;
+    this is often the point at which many maintainers first review the RFC
     in full depth.
   - The FCP lasts one week, or seven calendar days. It is also advertised
     widely, e.g. in [Ursa Mailing
@@ -179,23 +168,21 @@ next major release.
 In general, once accepted, RFCs should not be substantially changed. Only very
 minor changes should be submitted as amendments. More substantial changes
 should be new RFCs, with a note added to the original RFC. Exactly what counts
-as a "very minor change" is up to the sub-team to decide; check
-[Sub-team specific guidelines] for more details.
-
+as a "very minor change" is up to the maintainers to decide.
 
 ## Reviewing RFCs
 [Reviewing RFCs]: #reviewing-rfcs
 
-While the RFC pull request is up, the sub-team may schedule meetings with the
-author and/or relevant stakeholders to discuss the issues in greater detail,
-and in some cases the topic may be discussed at a sub-team meeting. In either
+While the RFC pull request is up, the maintainers may schedule meetings with
+the author and/or relevant stakeholders to discuss the issues in greater detail,
+and in some cases the topic may be discussed at a meeting. In either
 case a summary from the meeting will be posted back to the RFC pull request.
 
-A sub-team makes final decisions about RFCs after the benefits and drawbacks
-are well understood. These decisions can be made at any time, but the sub-team
+Maintainers make final decisions about RFCs after the benefits and drawbacks
+are well understood. These decisions can be made at any time, but maintainers
 will regularly issue decisions. When a decision is made, the RFC pull request
 will either be merged or closed. In either case, if the reasoning is not clear
-from the discussion in thread, the sub-team will add a comment describing the
+from the discussion in thread, a maintainer will add a comment describing the
 rationale for the decision.
 
 
@@ -205,9 +192,9 @@ rationale for the decision.
 Some accepted RFCs represent vital changes that need to be implemented right
 away. Other accepted RFCs can represent changes that can wait until some
 arbitrary developer feels like doing the work. Every accepted RFC has an
-associated issue tracking its implementation in the Ursa JIRA issue tracker; thus that
-associated issue can be assigned a priority via the triage process that the
-team uses for all issues related to Ursa.
+associated issue tracking its implementation in the Ursa JIRA issue tracker;
+thus that associated issue can be assigned a priority via the triage process
+that the team uses for all issues related to Ursa.
 
 The author of an RFC is not obligated to implement it. Of course, the RFC
 author (like any other developer) is welcome to post an implementation for
