@@ -42,28 +42,28 @@ decide if it requires this API.
 A possible implementation approach would be to modify TpRegisterRequest to
 indicate that the transaction processor desires header bytes.
 
-message TpRegisterRequest {
-    message TpProcessRequestHeaderStyle {
-        STYLE_UNSET,
-        EXPANDED,
-        RAW
-    }
+    message TpRegisterRequest {
+        message TpProcessRequestHeaderStyle {
+            STYLE_UNSET,
+            EXPANDED,
+            RAW
+        }
 
-    string family = 1;
-    string version = 2;
-    repeated string namespaces = 4;
-    uint32 max_occupancy = 5;
-    TpProcessRequestHeaderStyle process_request_header_style;
-}
+        string family = 1;
+        string version = 2;
+        repeated string namespaces = 4;
+        uint32 max_occupancy = 5;
+        TpProcessRequestHeaderStyle process_request_header_style = 6;
+    }
 With a new field within TpRegisterRequest:
 
-message TpProcessRequest {
-    TransactionHeader header = 1;  // The transaction header
-    bytes payload = 2;  // The transaction payload
-    string signature = 3;  // The transaction header_signature
-    string context_id = 4; // The context_id for state requests.
-    bytes header_raw = 5;
-}
+    message TpProcessRequest {
+        TransactionHeader header = 1;  // The transaction header
+        bytes payload = 2;  // The transaction payload
+        string signature = 3;  // The transaction header_signature
+        string context_id = 4; // The context_id for state requests.
+        bytes header_raw = 5;
+    }
 For EXPANDED, 'header' field would be filled in, for RAW, 'header_raw' would
 be filled in.
 
@@ -82,7 +82,7 @@ This will also increase the complexity of the validator slightly.
 # Rationale and alternatives
 [alternatives]: #alternatives
 
-an alternative would be that txn object that arrives to TP in 'apply' method 
+An alternative would be that txn object that arrives to TP in 'apply' method 
 will have an api to re-serialize the transaction header. 
 This solution could be problematic since it requires trust in protobuf that 
 de-serializing and re-serializing back will produce same bytes.
@@ -92,11 +92,11 @@ bloating the transactions with an additional redundant field from the header.
 
 # Prior art [prior-art]: #prior-art
 
-sawtooth 0.8 had had an API which sent the raw bytes, This API changed during
-1.0 stabilization to send the transaction payload as it is now
-Missing this API appears unique to the conjunction of the sawtooth
-architecture and the use of a trusted execution environment for the 
-transaction handling logic.
+The transaction processor API in Hyperledger Sawtooth v0.8 sent the raw header
+bytes, however this API was changed during the 1.0 stabilization period to
+its current state. The requirement that raw header bytes be included in the
+transaction processor API seems to be unique to processors that use a trusted
+execution environment.
 
 # Unresolved questions [unresolved]: #unresolved-questions
 
