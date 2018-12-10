@@ -6,8 +6,8 @@
 # Summary
 [summary]: #summary
 
-Requesting to add API to the sdk - txn.get_raw_header(), that will return
-the transaction header bytes.
+This RFC proposes an additional API call, txn.get_raw_header(), which will 
+return the transaction's header bytes.
 
 # Motivation 
 [motivation]: #motivation
@@ -27,17 +27,16 @@ This RFC adds a new method to directly access the transaction header bytes.
 Transaction Processor developers will use this API when they choose to re-verify
 the signature inside of a transaction processor.
 
-No change is recommended to the existing methods, so implementation of this RFC
+No change is recommended to the existing methods, so the implementation of this RFC
 should not cause any breakage for pre-existing transaction processors.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-The validator to forward the serialized header bytes of the transaction
-object, now calling the new get_serialized_header() will provide the
-bytes without the need to re-serialize. 
-there is also an option to add flag to TP registration in order to let TP
-decide if it requires this API.
+Calling get_raw_header() will return the serialized bytes of the transaction 
+object without the need to re-serialize.
+There is also an option to add a flag to the TP registration in order to let the 
+TP decide if it requires this API.
 
 A possible implementation approach would be to modify TpRegisterRequest to
 indicate that the transaction processor desires header bytes.
@@ -55,6 +54,7 @@ indicate that the transaction processor desires header bytes.
         uint32 max_occupancy = 5;
         TpProcessRequestHeaderStyle process_request_header_style = 6;
     }
+
 With a new field within TpRegisterRequest:
 
     message TpProcessRequest {
@@ -64,6 +64,7 @@ With a new field within TpRegisterRequest:
         string context_id = 4; // The context_id for state requests.
         bytes header_raw = 5;
     }
+
 For EXPANDED, 'header' field would be filled in, for RAW, 'header_raw' would
 be filled in.
 
@@ -82,10 +83,10 @@ This will also increase the complexity of the validator slightly.
 # Rationale and alternatives
 [alternatives]: #alternatives
 
-An alternative would be that txn object that arrives to TP in 'apply' method 
-will have an api to re-serialize the transaction header. 
-This solution could be problematic since it requires trust in protobuf that 
-de-serializing and re-serializing back will produce same bytes.
+An alternative would be that transaction object which is provided to the TP's 
+'apply' method will have an API to re-serialize the transaction header. 
+This solution could be problematic since it requires placing trust in protobuf 
+that de-serializing and re-serializing back will produce the same bytes.
 
 An alternative would be to sign the payload itself. That has the downside of 
 bloating the transactions with an additional redundant field from the header.
