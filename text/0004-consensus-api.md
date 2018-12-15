@@ -1,7 +1,7 @@
 - Feature Name: consensus-api
 - Start Date: 2018-03-15
-- RFC PR: (leave this empty)
-- Sawtooth Issue: (leave this empty)
+- RFC PR: [hyperledger/sawtooth-rfcs#4](https://github.com/hyperledger/sawtooth-rfcs/pull/4)
+- Sawtooth Issue: N/A
 
 # Summary
 [summary]: #summary

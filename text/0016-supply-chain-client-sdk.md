@@ -1,7 +1,7 @@
 - Feature Name: supply_chain_client_sdk
 - Start Date: 2018-03-26
-- RFC PR:
-- Sawtooth Issue:
+- RFC PR: [hyperledger/sawtooth-rfcs#16](https://github.com/hyperledger/sawtooth-rfcs/pull/16)
+- Sawtooth Issue: N/A
 
 # Summary
 [summary]: #summary

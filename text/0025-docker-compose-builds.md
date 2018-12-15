@@ -1,7 +1,7 @@
 - Feature Name: docker_compose_builds
 - Start Date:  2018-03-27
-- RFC PR:
-- Sawtooth Issue:
+- RFC PR:[hyperledger/sawtooth-rfcs#25](https://github.com/hyperledger/sawtooth-rfcs/pull/25)
+- Sawtooth Issue: N/A
 
 # Summary
 [summary]: #summary
