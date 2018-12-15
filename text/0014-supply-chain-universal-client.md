@@ -46,7 +46,7 @@ Record Detail, and Add Record. They are detailed below.
 
 ### View Record Page
 
-![View Records Page](../images/0000-view-records-page.png)
+![View Records Page](../images/0014-view-records-page.png)
 _*In the above mock up, dashed lines indicate elements that will only appear if
 the user is logged in._
 
@@ -57,7 +57,7 @@ should be listed.
 
 ### Record Detail Page
 
-![Record Detail Page](../images/0000-record-detail-page.png)
+![Record Detail Page](../images/0014-record-detail-page.png)
 
 _*In the above mock up, dotted lines indicate elements that will only appear if
 the user is logged in as an Agent with the correct permissions._
@@ -69,7 +69,7 @@ FishNet, this was hard coded.
 
 ### Add Record Page
 
-![Add Record Page](../images/0000-add-record-page.png)
+![Add Record Page](../images/0014-add-record-page.png)
 
 Similar to the other pages, the Add Record page gets a dropdown for "Type".
 This will allow users to select any of the RecordTypes on the blockchain, which
