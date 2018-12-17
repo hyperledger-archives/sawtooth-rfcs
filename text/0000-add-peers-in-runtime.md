@@ -4,11 +4,11 @@
 - Sawtooth Issue: (leave this empty)
 
 # Summary
-[summary]: #summary
-This RFC proposes to implement the possibility to add new peers in runtime
-(through the component validator endpoint) when a node is working in the
-`static` peering mode. Along with that it also adds the corresponding extensions
-to the off-chain permissioning model.
+[summary]: #summary This RFC proposes to implement the possibility to add new
+peers and remove the existing connections in runtime (through the component
+validator endpoint) when a node is working in the `static` peering mode. Along
+with that it also adds the corresponding extensions to the off-chain
+permissioning model.
 
 # Motivation
 [motivation]: #motivation
@@ -25,18 +25,18 @@ An example use case is using Sawtooth along with a service discovery system like
 [Consul](https://www.consul.io):
 
 - A Consul node is set up along with the Sawtooth node;
-- A middleware continuously fetches the changes of the peer list from the
-  Consul node;
+- A middleware continuously fetches the changes of the peer list from the Consul
+  node;
 - The middleware adds peers to the Sawtooth node via the validator component
   endpoint.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-When an administrator adds new peers to the network you very likely want to
-add them without restarting the validator with a newer `--peers` parameter
-value. To add a new peer you can send the `ClientAddPeersRequest` to the
-`component` endpoint of your Sawtooth validator.
+When an administrator adds new peers to the network you very likely want to add
+them without restarting the validator with a newer `--peers` parameter value. To
+add a new peer you can send the `ClientAddPeersRequest` to the `component`
+endpoint of your Sawtooth validator.
 
 The Protocol Buffers definition for this message is the following:
 
@@ -102,6 +102,22 @@ message ClientAddPeersResponse {
     Status status = 1;
     repeated string invalid_uris = 2;
 }
+
+message ClientRemovePeersRequest {
+    repeated string peers = 1;
+}
+
+message ClientRemovePeersResponse {
+    enum Status {
+        STATUS_UNSET = 0;
+        OK = 1;
+        INTERNAL_ERROR = 2;
+        // One of the requested peers do not exist
+        PEER_NOT_FOUND = 3;
+    }
+    Status status = 1;
+    repeated string invalid_uris = 2;
+}
 ```
 
 The rationale behind the `invalid_uris` is to be more precise about what is
@@ -116,6 +132,8 @@ message Message {
         // ...
         CLIENT_PEERS_ADD_REQUEST = 131;
         CLIENT_PEERS_ADD_RESPONSE = 132;
+        CLIENT_PEERS_REMOVE_REQUEST = 131;
+        CLIENT_PEERS_REMOVE_RESPONSE = 132;
         // ...
     }
     // ...
@@ -128,8 +146,7 @@ message Message {
 The requests are received on the `component` endpoint. When the validator
 receives a new request for adding peers it:
 
-- Validates the format of peer URIs which has to be
-  `tcp://IP_ADDRESS:PORT_NUMBER`
+- Validates the format of peer URIs which has to be `tcp://ADDRESS:PORT_NUMBER`
 - If the validation was successful then the validator updates its peer list and
   immediately returns the `OK` response. The new peers are connected _after_
   that.
