@@ -1,7 +1,7 @@
 - Feature Name: seth\_rpc\_extensions
 - Start Date: 2018-07-30
-- RFC PR:
-- Sawtooth Issue:
+- RFC PR: [hyperledger/sawtooth-rfcs#22](https://github.com/hyperledger/sawtooth-rfcs/pull/22)
+- Sawtooth Issue: N/A
 
 # Summary
 [summary]: #summary
@@ -40,7 +40,7 @@ implementing a compatible API that presents these endpoints:
  - personal_listAccounts
  - personal_newAccount
  - personal_unlockAccount
- 
+
 Additionally, in order to facilitate import existing accounts, the API will
 present this method that [geth][import-raw-key] has implemented:
 
@@ -199,7 +199,7 @@ Imports the given unencrypted private key, optionally encrypting it
 #### Parameters
 
 0. `String` - The private key to import
-0. `String` - (optional) The password to encrypt the key with 
+0. `String` - (optional) The password to encrypt the key with
 
 ```js
 params: [
