@@ -58,24 +58,6 @@ response = ClientAddPeersResponse()
 response.ParseFromString(response_serialized)
 ```
 
-The response Protocol Buffers definition is the following:
-
-```protobuf
-message ClientAddPeersResponse {
-    enum Status {
-        STATUS_UNSET = 0;
-        OK = 1;
-        INTERNAL_ERROR = 2;
-        // One or more of peer URIs were malformed. List of malformed URIs is in
-        // the `invalid_uris` field of this response.
-        INVALID_PEER_URI = 3;
-        MAXIMUM_PEERS_CONNECTIVITY_REACHED = 4;
-    }
-    Status status = 1;
-    repeated string invalid_uris = 2;
-}
-```
-
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
@@ -85,11 +67,11 @@ message ClientAddPeersResponse {
 I propose to add them to `protos/client_peers.proto`:
 
 ```protobuf
-message ClientAddPeersRequest {
-    repeated string peers = 1;
+message ClientAddPeerRequest {
+    repeated string peer_uri = 1;
 }
 
-message ClientAddPeersResponse {
+message ClientAddPeerResponse {
     enum Status {
         STATUS_UNSET = 0;
         OK = 1;
@@ -98,16 +80,17 @@ message ClientAddPeersResponse {
         // the `invalid_uris` field of this response.
         INVALID_PEER_URI = 3;
         MAXIMUM_PEERS_CONNECTIVITY_REACHED = 4;
+        AUTHORIZATION_VIOLATION = 5;
+        CONNECTION_DROPPED = 6;
     }
     Status status = 1;
-    repeated string invalid_uris = 2;
 }
 
-message ClientRemovePeersRequest {
+message ClientRemovePeerRequest {
     repeated string peers = 1;
 }
 
-message ClientRemovePeersResponse {
+message ClientRemovePeerResponse {
     enum Status {
         STATUS_UNSET = 0;
         OK = 1;
@@ -116,7 +99,6 @@ message ClientRemovePeersResponse {
         PEER_NOT_FOUND = 3;
     }
     Status status = 1;
-    repeated string invalid_uris = 2;
 }
 ```
 
@@ -146,10 +128,10 @@ message Message {
 The requests are received on the `component` endpoint. When the validator
 receives a new request for adding peers it:
 
-- Validates the format of peer URIs which has to be `tcp://ADDRESS:PORT_NUMBER`
-- If the validation was successful then the validator updates its peer list and
-  immediately returns the `OK` response. The new peers are connected _after_
-  that.
+- Validates the format of peer URI which has to be `tcp://ADDRESS:PORT_NUMBER`
+- If the validation was successful then the validator tries to connect to a
+  provided peer. If the connection was successful it returns the `OK` status.
+  Otherwise the corresponding error status is returned.
 
 Edge cases:
 
@@ -166,11 +148,8 @@ Edge cases:
 # Drawbacks
 [drawbacks]: #drawbacks
 
-- The proposed solution does not provide any information on the status of new
-  peers. It just returns immediately if a request does not break the conditions
-  specified in the previous chapter.
-- It does not specify any connection retry policies leaving it to the existing
-  peering implementation.
+- The proposed solution does not specify any connection retry policies leaving
+  it to the existing peering implementation.
 
 # Rationale and alternatives
 [alternatives]: #alternatives
@@ -200,6 +179,4 @@ Those two allow adding new peers in their platforms. Interesting points:
   not see any point in permissioning because the described feature remains an
   internal interface of the application. Even if we do then we can restrict the
   access to that feature by using a proxy as suggested in the documentation.
-- Should the system notify its user about the statuses of new connections or
-  leave the status check to the end user?
 - Should our team include the integration example of this solution for Consul?
