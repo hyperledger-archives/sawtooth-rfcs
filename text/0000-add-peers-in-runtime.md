@@ -49,12 +49,12 @@ message ClientAddPeersRequest {
 Simple Python example using `sawtooth_sdk.messaging.stream`:
 
 ```python
-new_peers = ['tcp://192.168.0.100:8008', 'tcp://192.168.0.200:8008']
-add_peers_request = ClientAddPeersRequest(new_peers=new_peers)
-future = stream.send(Message.CLIENT_ADD_PEERS_REQUEST,
-                     add_peers_request.SerializeToString())
+new_peer = 'tcp://192.168.0.100:8008'
+add_peer_request = ClientAddPeerRequest(peer_uri=new_peers)
+future = stream.send(Message.CLIENT_ADD_PEER_REQUEST,
+                     add_peer_request.SerializeToString())
 response_serialized = future.result().content
-response = ClientAddPeersResponse()
+response = ClientAddPeerResponse()
 response.ParseFromString(response_serialized)
 ```
 
