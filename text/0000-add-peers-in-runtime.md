@@ -69,6 +69,9 @@ I propose to add them to `protos/client_peers.proto`:
 ```protobuf
 message ClientAddPeerRequest {
     repeated string peer_uri = 1;
+    string admin_public_key = 2;
+    // The signature of `peer_uri`
+    string signature = 3;
 }
 
 message ClientAddPeerResponse {
@@ -76,18 +79,22 @@ message ClientAddPeerResponse {
         STATUS_UNSET = 0;
         OK = 1;
         INTERNAL_ERROR = 2;
+        ADMIN_AUTHORIZATION_ERROR = 3;
         // One or more of peer URIs were malformed. List of malformed URIs is in
         // the `invalid_uris` field of this response.
-        INVALID_PEER_URI = 3;
-        MAXIMUM_PEERS_CONNECTIVITY_REACHED = 4;
-        AUTHORIZATION_VIOLATION = 5;
-        CONNECTION_DROPPED = 6;
+        INVALID_PEER_URI = 4;
+        MAXIMUM_PEERS_CONNECTIVITY_REACHED = 5;
+        AUTHORIZATION_VIOLATION = 6;
+        CONNECTION_DROPPED = 7;
     }
     Status status = 1;
 }
 
 message ClientRemovePeerRequest {
-    repeated string peers = 1;
+    repeated string peer_uri = 1;
+    string admin_public_key = 2;
+    // The signature of `peer_uri`
+    string signature = 3;
 }
 
 message ClientRemovePeerResponse {
@@ -95,8 +102,9 @@ message ClientRemovePeerResponse {
         STATUS_UNSET = 0;
         OK = 1;
         INTERNAL_ERROR = 2;
-        // One of the requested peers do not exist
-        PEER_NOT_FOUND = 3;
+        ADMIN_AUTHORIZATION_ERROR = 3;
+        // The requested peer do not exist
+        PEER_NOT_FOUND = 4;
     }
     Status status = 1;
 }
@@ -145,6 +153,24 @@ Edge cases:
   the peers provided in a request without breaking the provided
   `maximum-peer-connectivity`.
 
+## Permissioning
+
+The proposition is to add the `admin` role to off-chain permissioning that will
+restrict access to requests that can be malicious. The workflow for the
+validation is the following:
+
+- If the `admin` role is not specified then the permissioning module will use
+  the `default` policy.
+- If the `default` policy is not specified then the validation of the
+  permissions is not performed and fields `admin_public_key` and `signature` can
+  be omitted.
+- If the `default` or the `admin` policy is specified, then the permission
+  verifier checks:
+  - If the `admin_public_key` is allowed.
+  - If the `signature` is correct.
+  - If one of the above conditions is not satisfied then the
+    `ADMIN_AUTHORIZATION_ERROR` is returned.
+
 # Drawbacks
 [drawbacks]: #drawbacks
 
@@ -180,3 +206,5 @@ Those two allow adding new peers in their platforms. Interesting points:
   internal interface of the application. Even if we do then we can restrict the
   access to that feature by using a proxy as suggested in the documentation.
 - Should our team include the integration example of this solution for Consul?
+- Should the permissioning be left as it is or generalized to a structure like
+  `(admin_public_key, signature, request)`?
