@@ -67,6 +67,7 @@ With a new field within TpRegisterRequest:
 
 For EXPANDED, 'header' field would be filled in, for RAW, 'header_raw' would
 be filled in.
+For backwards compatibility, EXPANDED is the default if RAW is not set.
 
 # Drawbacks
 [drawbacks]: #drawbacks
