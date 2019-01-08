@@ -133,10 +133,13 @@ message Message {
 ## How are the requests processed by the validator
 [request-processing]: #request-processing
 
-The requests are received on the `component` endpoint. When the validator
-receives a new request for adding peers it:
+The requests are received on the `component` endpoint.
 
-- Validates the format of peer URI which has to be `tcp://ADDRESS:PORT_NUMBER`
+### Adding peers
+
+When the validator receives a new request for adding peers it:
+
+- Validates the format of peer URI which has to be `tcp://ADDRESS:PORT_NUMBER`;
 - If the validation was successful then the validator tries to connect to a
   provided peer. If the connection was successful it returns the `OK` status.
   Otherwise the corresponding error status is returned.
@@ -152,6 +155,15 @@ Edge cases:
   fails with an error if so. The validator also fails if it cannot add _all_ of
   the peers provided in a request without breaking the provided
   `maximum-peer-connectivity`.
+
+### Removing peers
+
+When the validator receives a new request for removing peers it does the
+following:
+
+- Validates the format of peer URI which has to be `tcp://ADDRESS:PORT_NUMBER`;
+- If a peer is connected the validator removes it. Otherwise the
+  `PEER_NOT_FOUND` error is thrown.
 
 ## Permissioning
 
