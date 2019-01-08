@@ -19,7 +19,7 @@ significantly harder to write than if we had the possibility to add peers in the
 runtime and also decreases the uptime.
 
 To resolve this problem our team proposes to add a method to add new peers to a
-running node.
+running node and to remove peers from a running node.
 
 An example use case is using Sawtooth along with a service discovery system like
 [Consul](https://www.consul.io):
