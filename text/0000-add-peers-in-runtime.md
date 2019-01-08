@@ -122,8 +122,8 @@ message Message {
         // ...
         CLIENT_PEERS_ADD_REQUEST = 131;
         CLIENT_PEERS_ADD_RESPONSE = 132;
-        CLIENT_PEERS_REMOVE_REQUEST = 131;
-        CLIENT_PEERS_REMOVE_RESPONSE = 132;
+        CLIENT_PEERS_REMOVE_REQUEST = 133;
+        CLIENT_PEERS_REMOVE_RESPONSE = 134;
         // ...
     }
     // ...
