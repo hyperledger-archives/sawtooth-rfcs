@@ -14,9 +14,6 @@ This capability exists in the Sawtooth REST API, but is not currently
 available via the transaction processor protocol or SDKs (for reasons covered 
 in 'Drawbacks' below).
 
-An open question is how to handle a very large list (iterator/paging/max),
-this is not fully answered in this RFC, see 'unresolved-questions' below.
-
 # Motivation
 [motivation]: #motivation
 
@@ -82,13 +79,17 @@ validator for this new API and to support this API for each SDK.
 In the suggested implementation there are two proto changes:
 
 Addition to state_context.proto:
-
-
+	
+	// Import paging proto as used by REST-API read by prefix request
+	// The number of results per page defaults to 100 and maxes out at 1000
+	import "client_list_control.proto";
+	
 	// A request from a handler/tp for list of addresses with valid data
 	message TpStateAddressesListRequest {
 		// The context id that references a context in the contextmanager
 		string context_id = 1;
 		repeated string addresses = 2;
+		ClientPagingControls paging = 3;
 	}
 
 	// A response from the contextmanager/validator with a series of State 
@@ -98,10 +99,13 @@ Addition to state_context.proto:
 			STATUS_UNSET = 0;
 			OK = 1;
 			AUTHORIZATION_ERROR = 2;
+			NO_RESOURCE = 3;
+        		INVALID_PAGING = 4;
 		}
 
 		repeated string addresses = 1;
 		Status status = 2;
+		ClientPagingResponse paging = 3;    
 	}
 	
 Addition to validator.proto:
@@ -127,15 +131,9 @@ https://github.com/arsulegai/sawtooth-sdk-cxx/tree/jira_1375 (commit: 23697e8)
    commitment to backward compatibility.
 3. Will slightly increase the complexity of the validator.
 4. Since list of addresses can be very large this could cause a large I/O 
-   and CPU impact on validator. In our case, this is partly solved by making 
-   the new API return only address list without address data (based on my 
-   testing, list of up to 1K of addresses didn't take longer than a read). 
-   And still, it is recommended when possible to add restrictions in 
-   transaction processor for when this API will be called (same way it is 
-   not recommended to store more than 1MB of data in one address or modify
-   large list of addresses in one call).
-   Paging mechanism like done in the REST-API might be needed here to fully 
-   solve this problem. 
+   and CPU impact on validator. 
+   This is solved by making the new API return only address list without 
+   address data, and by adding paging mechanism like it is done in REST API.
 
 # Rationale and alternatives
 [alternatives]: #alternatives
@@ -156,7 +154,7 @@ addresses in the list is very be rare.
 Read state by address prefix is available at REST API, and is
 one of the key capability that comes from using the radix tree.
 
-in client_state.proto:
+The relevant protocol defined in client_state.proto is:
 
 	message ClientStateListRequest {
 	    string state_root = 1;
@@ -195,12 +193,4 @@ in client_state.proto:
 # Unresolved questions
 [unresolved]: #unresolved-questions
 
-Should we add a paging and max mechanism like exists in the REST API
-to prevent from using this API to read a too long list? 
-Same problem exists when trying regular read/write to long list of
-addresses or one address with very large data in it. 
-It is up to the transaction processor developer to make sure he handles 
-these cases (for example, design address mapping so address prefix used
-for delete will be at least 33 bytes, or have a way to limit when delete
-can be called). 
-Still adding paging mechanism or adding some max list size is a good idea.
+
