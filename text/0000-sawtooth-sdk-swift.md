@@ -178,22 +178,10 @@ and
 
 ### To be implemented
 
-- To use Carthage to import the SawtoothSigning framework into an iOS project
-  it is necessary to include a Cartfile, which describes the project’s
-  dependencies to Carthage. GitHub repositories are specified with the github
-  keyword. For example, it is possible to load the framework from a branch:
-  ```
-  github "bitwiseio/sawtooth-sdk-swift" "master"
-  ```
-
-  Or from a release:
-  ```
-  github "bitwiseio/sawtooth-sdk-swift" ~> 0.1
-  ```
-  Once the Hyperledger Swift SDK repository exists, the existing Cartfile in
-  the XO example will need to be updated to the new path of the SDK. The 
-  documentation will also need updated instructions on how to import the
-  SawtoothSigning framework from the new repository.
+- Once the Swift SDK repository exists under the Hyperledger organization,
+  the existing Cartfile in the XO example will need to be updated to the new
+  path of the SDK. The documentation will also need updated instructions on
+  how to import the SawtoothSigning framework from the new repository.
 
 - The Sawtooth protos are not included in the initial implementation of the
   Swift SDK. In order to create a Sawtooth application, developers will have 
