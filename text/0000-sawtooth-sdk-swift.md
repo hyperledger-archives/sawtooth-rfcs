@@ -194,14 +194,9 @@ and
 
 ### Other issues
 
-- The documentation for the Swift SDK uses the same templates as the other
-  SDKs. The templates were copied from the sawtooth-core repository. This is
-  not an ideal solution, as there is extra overhead to maintaining several
-  versions of the same documentation across several repositories.
-
-- Ideally, the documentation for the Swift SDK should be published under the
-  Application Developer's Guide section in the Sawtooth documentation,
-  together with the documentation for the other SDKs. It is not clear what the
-  best strategy is to publish the Swift SDK documentation, given that the
-  source files and code base are in a different repository than the Sawtooth
+- The documentation for the Swift SDK will need to be included in the
+  Sawtooth Core documentation under the Application Developer's Guide.
+  Currently, there is not a satisfactory approach to integrate SDK
+  documentation into the Sawtooth Core documentation, given that the source
+  files and code base are in a different repository than the Sawtooth
   documentation.
