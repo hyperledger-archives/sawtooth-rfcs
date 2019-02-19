@@ -6,11 +6,11 @@
 # Summary
 [summary]: #summary
 
-Develop a Sawtooth SDK for Swift to facilitate development for client side
-Cocoa/Cocoa Touch applications. It is modeled after existing SDKs,
-implementing a Sawtooth Signing module that provides methods to generate
-private/public key pairs and sign transactions. A separate repository should
-be created to host the Swift SDK.
+This RFC proposes a Sawtooth SDK for Swift to enable development of
+client-side Cocoa/Cocoa Touch applications. It should be modeled after
+existing SDKs, implementing a SawtoothSigning module that provides methods
+to generate private/public key pairs and sign transactions. A separate
+repository should be created to host the Swift SDK.
 
 # Motivation
 [motivation]: #motivation
@@ -25,13 +25,13 @@ community.
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-The Swift SDK works similarly to existing SDKs. It provides a SawtoothSigning
-module that supports generating private/public key pairs and signing bytes.
-This module facilitates signing transactions in a way that is compatible with
-Sawtooth requirements.
+The Swift SDK works similarly to existing SDKs. It provides a
+SawtoothSigning module that supports generating private/public key pairs and
+signing transactions. This module facilitates signing transactions in a way
+that is compatible with Sawtooth requirements.
 
 The Swift SDK proposed here does not currently implement a module to assist
-with the creation of Transaction Processors, as the initial purpose is to
+with the creation of transaction processors, as the initial purpose is to
 support front-end application development.
 
 ### Capabilities
@@ -95,7 +95,7 @@ iOS client for the
   - sign
   - getPublicKey
 
-### Importing SawtoothSigning framework
+### Importing the SawtoothSigning framework
 The Swift SDK's SawtoothSigning module can be imported to a Cocoa/Cocoa Touch
 project via [Carthage](https://github.com/Carthage/Carthage), a dependency
 manager for Cocoa applications.
@@ -121,7 +121,7 @@ manager for Cocoa applications.
 # Drawbacks
 [drawbacks]: #drawbacks
 
-There are no known drawbacks for this addition, besides the maintainence of an
+There are no known drawbacks for this addition, besides the maintenance of an
 additional SDK. No existing features or repositories will be changed.
 
 # Rationale and alternatives
@@ -138,12 +138,12 @@ An SDK that supports Cocoa/Cocoa Touch Applications could also be written in
 Objective-C. In spite of Objective-C being an older language with many
 feature-rich APIs, Swift is a better choice for a couple of reasons:
 
-- Swift is an language that is easier to learn, with simpler syntax which 
-  makes code easier to read and write. 
-- Using Swift makes is possible to export the SawtoothSigning module as a
+- Swift has a simpler syntax and is easier to learn, which makes code easier
+  to read and write.
+- Using Swift makes it possible to export the SawtoothSigning module as a
   dynamic framework rather than a static library. Dynamic frameworks reduce
   the launch time of apps and their memory footprints when compared to static
-  libraries. To use SawtoothSigning as dynamic framework also allows the users
+  libraries. Using SawtoothSigning as a dynamic framework allows developers
   to use Carthage to download and build the module directly from the GitHub
   repository.
 
@@ -186,29 +186,30 @@ and
   ```
   github "bitwiseio/sawtooth-sdk-swift" ~> 0.1
   ```
+  Once the Hyperledger Swift SDK repository exists, the existing Cartfile in
+  the XO example will need to be updated to the new path of the SDK. The 
+  documentation will also need updated instructions on how to import the
+  SawtoothSigning framework from the new repository.
 
-  If a new repository within the Hyperledger organization is created to host
-  the Sawtooth Swift SDK, the existing Carfile in the XO example needs to be
-  updated for the new path of the SDK. The documentation also needs to be
-  updated to include instructions on how to import the SawtoothSigning
-  framework from the new hyperledger repository.
+- The Sawtooth protos are not included in the initial implementation of the
+  Swift SDK. In order to create a Sawtooth application, developers will have 
+  to copy the Sawtooth `.proto` files into the application and use a Swift
+  protogen script to manually generate the protobuf messages. The XO client
+  example provides an example of this.
 
-- The Sawtooth protos are not included as part of the Swift SDK. Before
-  stabilization, we may want to include them as part of the SDK. Currently,
-  the Sawtooth `.proto` files and Swift protogen scripts are included directly
-  in the XO client example application. Further work must be done to
-  implement the generation of the protobuf messages as part of the Swift SDK.
+  If we want to include the Sawtooth protos as part of the SDK, further work
+  will have to be done to implement protogen functionality in the framework.
 
 ### Other issues
 
 - The documentation for the Swift SDK uses the same templates as the other
   SDKs. The templates were copied from the sawtooth-core repository. This is
-  not an ideal solution, as there is an extra overhead to maintaining several
+  not an ideal solution, as there is extra overhead to maintaining several
   versions of the same documentation across several repositories.
 
 - Ideally, the documentation for the Swift SDK should be published under the
   Application Developer's Guide section in the Sawtooth documentation,
   together with the documentation for the other SDKs. It is not clear what the
   best strategy is to publish the Swift SDK documentation, given that the
-  source files and code base are in an different repository than the Sawtooth
+  source files and code base are in a different repository than the Sawtooth
   documentation.
