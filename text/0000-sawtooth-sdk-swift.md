@@ -15,12 +15,16 @@ repository should be created to host the Swift SDK.
 # Motivation
 [motivation]: #motivation
 
-As the interest in Sawtooth grows, so does the demand for native mobile
-applications that can create and submit valid transactions. Additionally, the
-introduction of Hyperledger Grid has expanded the possibility for mobile use
-cases for the Sawtooth platform. The creation of a Swift SDK will facilitate
-the development of native applications for iOS and fulfill a need from the
-community.
+As interest in Sawtooth grows, it continues to be important to provide robust
+SDKs to enable developers to innovate on the platform. Since iOS is one of the
+most popular application platforms, it is crucial to extend Sawtooth to support
+native iOS application development.
+
+Additionally, the introduction of Hyperledger Grid has expanded the
+possibility for supply chain use cases for the Sawtooth platform. Many of
+these use cases may be well suited to mobile clients, allowing on-site
+professionals at manufacturing or logistics facilities to interact with a
+Sawtooth application.
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
