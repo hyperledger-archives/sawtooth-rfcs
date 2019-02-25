@@ -40,25 +40,18 @@ the block is safe to commit and will not need to be reverted later.
 If, while waiting to receive 2f+1 COMMIT messages from its peers, a node
 receives the next block in the chain, the node has an opportunity to
 short-circuit consensus. This is done by validating the consensus seal in the
-new block and confirming that it contains 2f+1 COMMIT messages for the block
-that the node is currently trying to commit. If it does, then the node copies
-enough COMMIT messages from the consensus seal into its own message log and
-commits the block.
+new block and confirming that it is a valid proof for the block that the node is
+currently trying to commit. If it is, then the node copies the COMMIT messages
+from the consensus seal into its own message log and commits the block.
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-When a new block is received, if there is already a block in progress, the
-block's consensus seal will be inspected to determine whether it contains
-enough information to commit the block that is in progress. This will be done
-by adding the messages included in the seal to the node's message log if they
-have not already been added and then checking whether enough messages are
-present to commit the in progress block. If this check succeeds, the
-in-progress block will be committed and the new block will be made the
-in-progress block.
-
-If the in progress block cannot be committed, then the new block message will
-be added to the message backlog as usual.
+When a new block is received by a node that has not yet committed the previous
+block, the new block's consensus seal will be inspected to determine whether it
+contains a valid seal to commit the previous block. This will be done by adding
+the messages included in the seal to the node's message log and committing the
+previous block.
 
 # Drawbacks
 [drawbacks]: #drawbacks
@@ -71,8 +64,8 @@ There are no known drawbacks to this change.
 The first alternative that was considered was to allow nodes to receive
 historic messages from other nodes' message logs, either by requesting messages
 or requesting that a node catch another node up. However, this solution does
-not work if a node is behind far enough that a checkpoint has happened, because
-the necessary messages no longer exist anywhere.
+not work if a node is behind far enough that the other nodes have already
+cleaned their logs and no longer have the relevant messages.
 
 Another alternative that was considered is putting nodes into a special
 "catchup" mode when they startup up if they are behind. The problem with this
@@ -99,16 +92,4 @@ seal, which is signed and contains the necessary messages (state).
 # Unresolved questions
 [unresolved]: #unresolved-questions
 
-A big open question is whether pre-prepare or prepare messages are required to
-be kept in each node's message log. Currently, the consensus seal contains only
-COMMIT messages, so if consensus is short-circuited, the pre-prepare and
-prepare messages will be missing from that node's message log. So the
-unresolved questions are:
-
-- Do we need all the prepare and pre-prepare messages in the each nodes'
-  backlog?
-- What depends on prepare and pre-prepare messages?
-- Or if we get the next block with the seal, can we skip adding those?
-
-If pre-prepare and prepare messages are required, then the simplest thing to do
-is include them in the consensus seal.
+No unresolved questions
