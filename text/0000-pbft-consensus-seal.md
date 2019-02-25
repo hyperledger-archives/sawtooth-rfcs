@@ -54,58 +54,81 @@ historic logs available.
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
-The consensus seal for PBFT consists primarily of 2f+1 or more signed COMMIT
-messages from other nodes participating in consensus. In order to guarantee
-that the seal cannot be reused with another block, we require that it also
-contain the new block's summary and the previous block's signature in the seal.
+The consensus seal for PBFT consists primarily of 2f or more signed COMMIT
+messages from other nodes participating in consensus. The minimum number of
+messages in the seal is actually 2f rather than 2f + 1 because the seal itself
+counts as the COMMIT vote from the node that creates the seal. This is done out
+of necessity: a vote that is created by the PBFT consensus engine and added to
+its own log is not actually signed, since signing is done by the validator and
+the consensus engine does not have access to the private key for signing the
+message.
 
-We define the consensus seal for PBFT as the following protobuf message, to be
-serialized and included in the block's consensus payload field:
+In order to guarantee that the seal cannot be reused for another block, we
+require that it contain the ID of the block it verifies. Additionally, the seal
+contains an information message that identifies the creator of the seal, as well
+as the view and sequence number that the included votes must match.
 
-    message PbftSignedCommitVote {
-      // Serialized ConsensusPeerMessageHeader
-      bytes header = 1;
+We define the consensus seal for PBFT using the following protobuf messages:
+
+    message PbftSignedVote {
+      // Serialized ConsensusPeerMessage header
+      bytes header_bytes = 1;
+
+      // Signature of the serialized ConsensusPeerMessageHeader
       bytes header_signature = 2;
 
-      // Serialized PbftMessage COMMIT message for the block with id equal to
-      // `previous_id` in the seal
-      bytes message = 3;
+      // Serialized PBFT message
+      bytes message_bytes = 3;
     }
 
     message PbftSeal {
-      bytes previous_id = 1;
-      bytes summary = 2;
-      repeated PbftSignedCommitVote previous_commit_votes = 3;
+      // Message information
+      PbftMessageInfo info = 1;
+
+      // ID of the block this seal verifies
+      bytes block_id = 2;
+
+      // A list of Commit votes to prove the block commit (must contain at least
+      // 2f votes)
+      repeated PbftSignedVote commit_votes = 3;
     }
 
+The `PbftSeal` protobuf will be serialized and included in a block's consensus
+payload field.
+
 Before a new block can be finalized by the leader, a `PbftSeal` must be
-constructed with 2f+1 `PbftSignedCommitVote` messages included for the previous
-block. Prior to followers committing a block, they must verify the `PbftSeal`.
-To verify the seal, the node must:
+constructed with 2f `PbftSignedVote` messages for the previous block. Prior to
+followers committing a block, they must verify the `PbftSeal`. To verify the
+seal, the node must:
 
-1. Verify the `previous_id` field in the seal matches the `previous_id` field
+1. Parse the `PbftSeal` from the bytes in the block's `payload` field
+2. Check that the `block_id` field in the seal matches the `previous_id` field
    in the block that the node is trying to commit
-2. Verify the `summary` field in the seal matches the `summary` field in the
-   block that the node is trying to commit
-3. Verify that all `ConsensusPeerMessageHeader.signer_id` fields are unique and
-   that they all correspond to public keys of nodes that were participating in
-   that block according to the `sawtooth.consensus.pbft.peers` field.
-4. For each vote:
-   1. Verify the signature of each `PbftSignedCommitVote` by checking that
-      `header_signature` is a valid signature over `header` using the private
-      key associated with the public key in the header,
-      `ConsensusPeerMessageHeader.signer_id`.
-   2. Verify that the SHA512 digest of the `PbftSignedCommitVote.message` field
-      matches the `ConsensusPeerMessageHeader.content_sha512` field. This
-   3. Verify that the `PbftMessage.block.block_id` field matches the
-      `PbftSeal.previous_id` field.
-
+3. For each vote, verify that:
+   1. It is a `Commit` message
+   2. Its `block_id`, `seq_num`, and `view` fields match those of the `PbftSeal`
+   3. Its `header_signature` is a valid signature over `header` using the
+      private key associated with the public key in the header's `signer_id`
+      field.
+   4. The header's `content_sha512` is a valid SHA-512 hash of the vote's
+      `message_bytes`.
+   5. The signer was a member of the network at the time the block was voted on
+      (the block was voted on before it was committed, so the list of peers
+      should be taken from the block before the one the seal verifies)
+   6. The signer is not the same as the consensus seal's signer (this would be a
+      double-vote)
+4. Check that the consensus seal's signer was a member of the network at the
+   time the block was voted on (the block was voted on before it was committed,
+   so the signer's ID should be in the list of peers that is taken from the
+   block before the one the seal verifies)
+5. Check that all votes are from unique peers
+6. Check that there are a total of 2f votes
 
 # Drawbacks
 [drawbacks]: #drawbacks
 
 There are two drawbacks to this change. First, additional signature and digest
-verification for 2f+1 messages at every block creates additional work that
+verification for 2f messages at every block creates additional work that
 scales up with the size of the network, causing further slowdowns on large
 networks. Second, requiring the consensus seal be included in the block before
 it is finalized prevents a leader from finalizing a block before the previous
