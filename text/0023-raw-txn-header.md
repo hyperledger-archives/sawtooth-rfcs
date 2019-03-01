@@ -1,7 +1,7 @@
 - Feature Name: raw_txn_header
 - Start Date: 2018-08-03
-- RFC PR:
-- Sawtooth Issue:
+- RFC PR: https://github.com/hyperledger/sawtooth-rfcs/pull/23
+- Sawtooth Issue: N/A
 
 # Summary
 [summary]: #summary
