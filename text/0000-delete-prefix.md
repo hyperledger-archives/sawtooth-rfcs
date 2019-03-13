@@ -73,8 +73,8 @@ Addition to state_context.proto:
 		repeated string addresses_prefix = 2;
 	}
 
-	// A response form the contextmanager/validator with the addresses that 
-	// were deleted
+	// A response from the context_manager/validator with the addresses
+	// that were deleted
 	message TpStateDeleteResponse {
 		enum Status {
 			STATUS_UNSET = 0;
@@ -133,3 +133,4 @@ storing the global state.
 
 Implementation of the validator changes for the new context API are not
 prescribed in this RFC.
+
