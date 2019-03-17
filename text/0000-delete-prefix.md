@@ -82,8 +82,7 @@ Addition to state_context.proto:
 			AUTHORIZATION_ERROR = 2;
 		}
 
-		repeated string addresses = 1;
-		Status status = 2;
+		Status status = 1;
 	}
 
 Addition to validator.proto:
