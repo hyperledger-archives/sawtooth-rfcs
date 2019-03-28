@@ -2,7 +2,6 @@ The root team serves as leadership for the Sawtooth project as a whole.
 
 | Name | GitHub | RocketChat |
 | --- | --- | --- |
-| Adam Ludvik | aludvik | adamludvik |
 | Andi Gunderson | agunde406 | agunde |
 | Dan Middleton | dcmiddle | Dan |
 | James Mitchell | jsmitchell | jsmitchell |

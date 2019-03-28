@@ -9,7 +9,6 @@ another appropriate subteam.
 
 | Name | GitHub | RocketChat |
 | --- | --- | --- |
-| Adam Ludvik | aludvik | adamludvik |
 | Andi Gunderson | agunde406 | agunde |
 | Dan Middleton | dcmiddle | Dan |
 | James Mitchell | jsmitchell | jsmitchell |
