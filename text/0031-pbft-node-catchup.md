@@ -1,7 +1,7 @@
 - Feature Name: pbft_node_catchup
 - Start Date: 2018-11-2
-- RFC PR: (leave this empty)
-- Sawtooth Issue: (leave this empty)
+- RFC PR: https://github.com/hyperledger/sawtooth-rfcs/pull/31
+- Sawtooth Issue: N/A
 
 # Summary
 [summary]: #summary
