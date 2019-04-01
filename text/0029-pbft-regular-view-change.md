@@ -1,7 +1,7 @@
 - Feature Name: pbft_regular_view_changes
 - Start Date: 2018-10-11
-- RFC PR: (leave this empty)
-- Sawtooth Issue: (leave this empty)
+- RFC PR: https://github.com/hyperledger/sawtooth-rfcs/pull/29
+- Sawtooth Issue: N/A
 
 # Summary
 [summary]: #summary
