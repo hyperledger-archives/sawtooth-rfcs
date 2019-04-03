@@ -73,8 +73,7 @@ Addition to state_context.proto:
 		repeated string addresses_prefix = 2;
 	}
 
-	// A response from the context_manager/validator with the addresses
-	// that were deleted
+	// A response from the context_manager/validator
 	message TpStateDeleteResponse {
 		enum Status {
 			STATUS_UNSET = 0;
