@@ -4,21 +4,18 @@
 - Sawtooth Issue: (leave this empty)
 
 # Summary
-[summary]: #summary This RFC proposes to implement the possibility to add new
-peers and remove the existing connections in runtime (through the component
-validator endpoint) when a node is working in the `static` peering mode. Along
-with that it also adds the corresponding extensions to the off-chain
-permissioning model.
+[summary]: #summary This RFC proposes functionality to add and remove static
+peer connections while a validator node is running in the `static` peering mode.
+This RFC also adds the corresponding extensions to the off-chain permssioning
+model.
 
 # Motivation
 [motivation]: #motivation
 
-When an administrator adds a new node to an existing Sawtooth network he/she has
-to restart a node with new peering settings. This makes any automation
-significantly harder to write than if we had the possibility to add peers in the
-runtime and also decreases the uptime.
-
-To resolve this problem our team proposes to add a method to add new peers to a
+When an administrator adds a new node to an existing Sawtooth network, he has to
+restart a node with new peering settings. Restarting the process adds
+substantial complexity to infrastructure automation, and incurs system downtime.
+To resolve this problem, our team proposes to add a method to add new peers to a
 running node and to remove peers from a running node.
 
 An example use case is using Sawtooth along with a service discovery system like
@@ -33,10 +30,10 @@ An example use case is using Sawtooth along with a service discovery system like
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
 
-When an administrator adds new peers to the network you very likely want to add
-them without restarting the validator with a newer `--peers` parameter value. To
-add a new peer you can send the `ClientAddPeersRequest` to the `component`
-endpoint of your Sawtooth validator.
+When an administrator adds new peers to the network, he likely wants to connect
+to them without needing to restart existing validators with an updated `--peers`
+parameter value. To add a new peer, the administrator can send send the
+`ClientAddPeersRequest` to the `component` endpoint of your Sawtooth validator.
 
 The Protocol Buffers definition for this message is the following:
 
@@ -64,7 +61,7 @@ response.ParseFromString(response_serialized)
 ## Protocol Buffers definitions
 [protobuf]: #protobuf
 
-I propose to add them to `protos/client_peers.proto`:
+The definitions proposed to be added to `protos/client_peers.proto`:
 
 ```protobuf
 message ClientAddPeerRequest {
@@ -113,7 +110,7 @@ message ClientRemovePeerResponse {
 The rationale behind the `invalid_uris` is to be more precise about what is
 wrong and to ease the debugging process for developers.
 
-We should also add new message types to `protos/validator.proto`:
+New message types should also be added to `protos/validator.proto`:
 
 ```protobuf
 message Message {
@@ -140,18 +137,18 @@ The requests are received on the `component` endpoint.
 When the validator receives a new request for adding peers it:
 
 - Validates the format of peer URI which has to be `tcp://ADDRESS:PORT_NUMBER`;
-- If the validation was successful then the validator tries to connect to a
-  provided peer. If the connection was successful it returns the `OK` status.
-  Otherwise the corresponding error status is returned.
+- If the validation was successful, then the validator tries to connect to a
+  provided peer. If the connection was successful, it returns the `OK` status.
+  Otherwise, the corresponding error status is returned.
 
 Edge cases:
 
 - The peer address format was wrong in one or more of the provided peers. If
-  that happens then the request fails without adding any new peers to the peers
+  that happens, then the request fails without adding any new peers to the peers
   list and returns the `INVALID_PEER_URI` status along with the list of faulty
   peer URIs.
-- If the `--maximum-peer-connectivity` parameter was provided to the validator
-  then the validator checks if it has reached the maximum peer connectivity and
+- If the `--maximum-peer-connectivity` parameter was provided to the validator,
+  then the validator checks if it has reached the maximum peer connectivity, and
   fails with an error if so. The validator also fails if it cannot add _all_ of
   the peers provided in a request without breaking the provided
   `maximum-peer-connectivity`.
@@ -162,7 +159,7 @@ When the validator receives a new request for removing peers it does the
 following:
 
 - Validates the format of peer URI which has to be `tcp://ADDRESS:PORT_NUMBER`;
-- If a peer is connected the validator removes it. Otherwise the
+- If a peer is connected, the validator removes it. Otherwise, the
   `PEER_NOT_FOUND` error is thrown.
 
 ## Permissioning
@@ -171,16 +168,16 @@ The proposition is to add the `admin` role to off-chain permissioning that will
 restrict access to requests that can be malicious. The workflow for the
 validation is the following:
 
-- If the `admin` role is not specified then the permissioning module will use
+- If the `admin` role is not specified, then the permissioning module will use
   the `default` policy.
-- If the `default` policy is not specified then the validation of the
+- If the `default` policy is not specified, then the validation of the
   permissions is not performed and fields `admin_public_key` and `signature` can
   be omitted.
 - If the `default` or the `admin` policy is specified, then the permission
   verifier checks:
   - If the `admin_public_key` is allowed.
   - If the `signature` is correct.
-  - If one of the above conditions is not satisfied then the
+  - If one of the above conditions is not satisfied, then the
     `ADMIN_AUTHORIZATION_ERROR` is returned.
 
 # Drawbacks
@@ -213,9 +210,9 @@ Those two allow adding new peers in their platforms. Interesting points:
   final solution on "should it be included to the REST API or no?"
 - In the same discussion, there was a proposition to resolve security issues by
   using this feature along with the permissioning module. If we do not add this
-  feature to the REST API and hence to the administrative utilities then I do
+  feature to the REST API and hence to the administrative utilities, then I do
   not see any point in permissioning because the described feature remains an
-  internal interface of the application. Even if we do then we can restrict the
+  internal interface of the application. Even if we do, then we can restrict the
   access to that feature by using a proxy as suggested in the documentation.
 - Should our team include the integration example of this solution for Consul?
 - Should the permissioning be left as it is or generalized to a structure like
