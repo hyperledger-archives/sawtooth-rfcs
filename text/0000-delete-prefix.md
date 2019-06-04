@@ -97,7 +97,7 @@ Addition to validator.proto:
 # Drawbacks
 [drawbacks]: #drawbacks
 
-1. This will need to be implemented in every sawtooth SDK.
+1. This will need to be implemented in every Sawtooth SDK.
 2. Once implemented it will be difficult to deprecate because of our 
    commitment to backward compatibility.
 3. This requires transaction processor developers to understand the risk of
@@ -119,11 +119,18 @@ list of all addresses. This address could be huge and it needs to be changed
 for almost every transaction, while the need to delete all the addresses in 
 the list is very rare.
 
+Instead of adding a new API for delete prefix that will get list of addresses
+prefix, an alternative would be to extend existing delete API to support both
+list of addresses prefix and list of full address.
+The validator would then need to distinguish each element of the list as
+between a full 70 character address as a single address or something less than
+70 as a prefix.
+
 # Prior art
 [prior-art]: #prior-art
 
 Access address by prefix is a key capability of radix tree.
-This RFC intends to take advantage of sawtooth design to use a radix tree for
+This RFC intends to take advantage of Sawtooth design to use a radix tree for
 storing the global state.
 
 # Unresolved questions
