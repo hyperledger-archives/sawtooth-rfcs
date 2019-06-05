@@ -4,10 +4,12 @@
 - Sawtooth Issue: (leave this empty)
 
 # Summary
-[summary]: #summary This RFC proposes functionality to add and remove static
+[summary]: #summary
+
+This RFC proposes functionality to add and remove static
 peer connections while a validator node is running in the `static` peering mode.
 This RFC also adds the corresponding extensions to the off-chain permssioning
-model.
+model and adds the `admin` endpoint.
 
 # Motivation
 [motivation]: #motivation
@@ -18,13 +20,17 @@ substantial complexity to infrastructure automation, and incurs system downtime.
 To resolve this problem, our team proposes to add a method to add new peers to a
 running node and to remove peers from a running node.
 
+The `admin` endpoint is added to separate the administrative functions from
+client requests and to facilitate better security (for instance, using firewall
+rules to restrict the access to the `admin` endpoint).
+
 An example use case is using Sawtooth along with a service discovery system like
 [Consul](https://www.consul.io):
 
 - A Consul node is set up along with the Sawtooth node;
 - A middleware continuously fetches the changes of the peer list from the Consul
   node;
-- The middleware adds peers to the Sawtooth node via the validator component
+- The middleware adds peers to the Sawtooth node via the validator admin
   endpoint.
 
 # Guide-level explanation
@@ -33,12 +39,12 @@ An example use case is using Sawtooth along with a service discovery system like
 When an administrator adds new peers to the network, he likely wants to connect
 to them without needing to restart existing validators with an updated `--peers`
 parameter value. To add a new peer, the administrator can send send the
-`ClientAddPeersRequest` to the `component` endpoint of your Sawtooth validator.
+`AdminAddPeersRequest` to the `admin` endpoint of the Sawtooth validator.
 
 The Protocol Buffers definition for this message is the following:
 
 ```protobuf
-message ClientAddPeersRequest {
+message AdminAddPeersRequest {
     repeated string peers = 1;
 }
 ```
@@ -47,31 +53,65 @@ Simple Python example using `sawtooth_sdk.messaging.stream`:
 
 ```python
 new_peer = 'tcp://192.168.0.100:8008'
-add_peer_request = ClientAddPeerRequest(peer_uri=new_peers)
-future = stream.send(Message.CLIENT_ADD_PEER_REQUEST,
+add_peer_request = AdminAddPeerRequest(peer_uri=new_peers)
+future = stream.send(Message.ADMIN_PEERS_ADD_REQUEST,
                      add_peer_request.SerializeToString())
 response_serialized = future.result().content
-response = ClientAddPeerResponse()
+response = AdminAddPeerResponse()
 response.ParseFromString(response_serialized)
 ```
 
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
+## Admin endpoint
+
+The `admin` is the separate validator endpoint that separates administrative
+requests from client requests.
+
+All request passed to this endpoint are signed and checked against the `admin`
+off-chain permissioning policy.
+
+The structure of a request to the `admin` endpoint is the following:
+
+```protobuf
+message AdminMessage {
+    message AdminMessageHeader {
+        Message.MessageType message_type = 1;
+        string payload_sha512 = 2;
+        string signer_public_key = 3;
+    }
+
+    AdminMessageHeader header = 1;
+    string header_signature = 2;
+    bytes payload = 3;
+}
+```
+
+Administrative messages are passed as specified in `protos/validator.proto` and
+the special type is introduced for administrative messages:
+
+```protobuf
+message Message {
+    enum MessageType {
+        // ...
+        ADMIN_REQUEST = 400;
+        // ...
+    }
+}
+```
+
 ## Protocol Buffers definitions
 [protobuf]: #protobuf
 
-The definitions proposed to be added to `protos/client_peers.proto`:
+The definitions proposed to be added to `protos/admin_peers.proto`:
 
 ```protobuf
-message ClientAddPeerRequest {
+message AdminAddPeerRequest {
     repeated string peer_uri = 1;
-    string admin_public_key = 2;
-    // The signature of `peer_uri`
-    string signature = 3;
 }
 
-message ClientAddPeerResponse {
+message AdminAddPeerResponse {
     enum Status {
         STATUS_UNSET = 0;
         OK = 1;
@@ -87,14 +127,11 @@ message ClientAddPeerResponse {
     Status status = 1;
 }
 
-message ClientRemovePeerRequest {
+message AdminRemovePeerRequest {
     repeated string peer_uri = 1;
-    string admin_public_key = 2;
-    // The signature of `peer_uri`
-    string signature = 3;
 }
 
-message ClientRemovePeerResponse {
+message AdminRemovePeerResponse {
     enum Status {
         STATUS_UNSET = 0;
         OK = 1;
@@ -110,27 +147,22 @@ message ClientRemovePeerResponse {
 The rationale behind the `invalid_uris` is to be more precise about what is
 wrong and to ease the debugging process for developers.
 
-New message types should also be added to `protos/validator.proto`:
+New message types should also be added to the `admin` endpoint:
 
 ```protobuf
-message Message {
+message AdminMessage {
 
-    enum MessageType {
+    enum AdminMessageType {
         // ...
-        CLIENT_PEERS_ADD_REQUEST = 131;
-        CLIENT_PEERS_ADD_RESPONSE = 132;
-        CLIENT_PEERS_REMOVE_REQUEST = 133;
-        CLIENT_PEERS_REMOVE_RESPONSE = 134;
+        ADMIN_PEERS_ADD_REQUEST = 411;
+        ADMIN_PEERS_ADD_RESPONSE = 412;
+        ADMIN_PEERS_REMOVE_REQUEST = 413;
+        ADMIN_PEERS_REMOVE_RESPONSE = 414;
         // ...
     }
     // ...
 }
 ```
-
-## How are the requests processed by the validator
-[request-processing]: #request-processing
-
-The requests are received on the `component` endpoint.
 
 ### Adding peers
 
@@ -161,24 +193,6 @@ following:
 - Validates the format of peer URI which has to be `tcp://ADDRESS:PORT_NUMBER`;
 - If a peer is connected, the validator removes it. Otherwise, the
   `PEER_NOT_FOUND` error is thrown.
-
-## Permissioning
-
-The proposition is to add the `admin` role to off-chain permissioning that will
-restrict access to requests that can be malicious. The workflow for the
-validation is the following:
-
-- If the `admin` role is not specified, then the permissioning module will use
-  the `default` policy.
-- If the `default` policy is not specified, then the validation of the
-  permissions is not performed and fields `admin_public_key` and `signature` can
-  be omitted.
-- If the `default` or the `admin` policy is specified, then the permission
-  verifier checks:
-  - If the `admin_public_key` is allowed.
-  - If the `signature` is correct.
-  - If one of the above conditions is not satisfied, then the
-    `ADMIN_AUTHORIZATION_ERROR` is returned.
 
 # Drawbacks
 [drawbacks]: #drawbacks
