@@ -195,8 +195,8 @@ state-of-the-art solution.
 # Prior art
 [prior-art]: #prior-art
 
-- [`addnode` in Bitcoin JSON RPC](https://bitcoincore.org/en/doc/0.16.0/rpc/network/addnode/)
-- [`admin_addPeer` in Ethereum management API](https://github.com/ethereum/go-ethereum/wiki/Management-APIs#admin_addpeer)
+- [`addnode` in Bitcoin JSON RPC][btcrpc]
+- [`admin_addPeer` in Ethereum management API][ethrpc]
 
 Those two allow adding new peers in their platforms. Interesting points:
 
@@ -217,3 +217,6 @@ Those two allow adding new peers in their platforms. Interesting points:
 - Should our team include the integration example of this solution for Consul?
 - Should the permissioning be left as it is or generalized to a structure like
   `(admin_public_key, signature, request)`?
+
+[btcrpc]: https://bitcoincore.org/en/doc/0.16.0/rpc/network/addnode/
+[ethrpc]: https://github.com/ethereum/go-ethereum/wiki/Management-APIs#admin_addpeer
