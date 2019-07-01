@@ -1,6 +1,6 @@
 - Feature Name: sawtooth_sdk_swift
 - Start Date: 2019-02-14
-- RFC PR:
+- RFC PR: https://github.com/hyperledger/sawtooth-rfcs/pull/37
 - Sawtooth Issue:
 
 # Summary
