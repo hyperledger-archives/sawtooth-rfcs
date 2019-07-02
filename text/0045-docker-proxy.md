@@ -112,7 +112,7 @@ RUN \
  --recv-keys 8AA7AF1F1091A5FD
 ```
 
-Use the following, which works in proxy (with http_proxy) and non-proxy environments:
+Use the following, which works in proxy and non-proxy environments:
 
 ```
 RUN \
