@@ -166,17 +166,15 @@ struct EventProcessor
 
 impl EventProcessor {
     pub fn new(validator_endpoint: String) -> Self
-    
+    { ... }
 
     pub fn add_subscription(&mut self, subscription: Subscription)
         -> Result<(), EventProcessorError>
     { ... }
     
-
     pub fn add_event_handler(&mut self, event_handler: Box<dyn EventHandler>)
         -> Result<(), EventProcessorError>
     { ... }
-    
 
     pub fn start(self)
         -> Result<ShutdownHandle, EventProcessorError> 
