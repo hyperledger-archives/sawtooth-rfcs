@@ -45,8 +45,8 @@ cumbersome apt command-specific configuration file settings in
 * Have Docker and Docker Compose files and shell scripts that work in explicit
   proxy, transparent proxy, and non-proxy environments
 * Have a uniform method to access proxy servers across Hyperledger Sawtooth
-  projects * Minimize Docker and script clutter with unnecessary tests and
-  settings
+  projects
+* Minimize Docker and script clutter with unnecessary tests and settings
 
 # Guide-level explanation
 [guide-level-explanation]: #guide-level-explanation
@@ -112,14 +112,23 @@ RUN \
  --recv-keys 8AA7AF1F1091A5FD
 ```
 
-Use the following, which works in proxy and non-proxy environments:
+Use the following, which works in proxy and non-proxy environments.
+Although not proxy-related, this example also has retry logic and uses
+two keyservers for robustness:
 
 ```
 RUN \
- apt-get update && apt-get install -yq curl && curl -sSL \
- 'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8AA7AF1F1091A5FD’\
- | apt-key add -
+ apt-get update && apt-get install -yq curl && \
+ (curl --retry 3 -sSL \
+  'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8AA7AF1F1091A5FD' \
+  | apt-key add - || curl --retry 3 -sSL \
+  'http://p80.pool.sks-keyservers.net/pks/lookup?op=get&search=0x8AA7AF1F1091A5FD' \
+  | apt-key add -)
 ```
+
+For more detail, see the section "Configure the Docker client" for Docker 17.07
+and higher in "Configure Docker to use a proxy server" at
+https://docs.docker.com/network/proxy/#configure-the-docker-client
 
 
 # Conclusion
@@ -149,7 +158,7 @@ The alternative of setting `https_proxy` , `http_proxy` , and `no_proxy`
 variables has the disadvantage of requiring these variables to be explicitly
 passed through the `args:` and `environment:` sections for each container in a `docker-compose.yaml` file.
 
-A forth alternative, setting configuration for newer versions of gpg (in
+A fourth alternative, setting configuration for newer versions of gpg (in
 Bionic, but not in Xenial) is more difficult as it does not work in Xenial
 and requires adding GPG-specific configuration files containing proxy
 configuration (instead of just passing an environment variable. This will
