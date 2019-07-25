@@ -58,45 +58,9 @@ In order to use the proposed containers, developers and users in proxied
 environments must set these proxy variables in their
 `$HOME/.docker/config.json` configuration file. The `config.json` file
 resides on the Docker host system, not in the Docker container filesystem.
-The relevant settings are:
 
-* `httpProxy` sets the proxy and port for unsecure web (HTTP) requests.
-  The setting is site-specific for your corporate proxy server. For example,
-  `"httpProxy": "http://proxy.foocorp.com:8080",`
-* `httpsProxy` sets the proxy and port for HTTPS (TLS) requests. For example,
-  `"httpsProxy": "http://proxy.foocorp.com:4443",`
-* `ftpProxy` sets the proxy for FTP file transfer (this is not common)
-* `noProxy` sets a comma-separated list of networks and hosts that are in
-  the internal network. For example,
-  `"noProxy": "192.168.0.0/16,172.16.0.0/12,10.0.0.0,localhost,127.0.0.0/8,::1,foocorp.com",`
-
-  Make sure you include Docker Compose internal network(s), which by default
-   are within `172.16.0.0/12` (use `netstat -rn` to list your networks)
-* Do not set `http_proxy` , `https_proxy` , and `no_proxy` or their upper
-  case equivalents. This method has been replaced with the `config.json`
-  settings.
-* Proxy support should be briefly mentioned in the README.md file or similar
-  file, along with the proxy variable(s) needed, such as `httpProxy`
-
-The following is a generic example of `$HOME/.docker/config.json` . The
-actual contents are site specific:
-
-```
-{
- "proxies":
- {
-   "default":
-   {
-     "httpProxy": "http://proxy.foocorp.com:8080",
-     "httpsProxy": "http://proxy.foocorp.com:4443",
-     "noProxy": "192.168.0.0/16,172.16.0.0/12,10.0.0.0,localhost,127.0.0.0/8,::1,foocorp.com"
-   }
- }
-}
-````
-
-For more detail, see the section "Configure the Docker client" for Docker 17.07
-and higher in "Configure Docker to use a proxy server" 
+The file format is documented at in the section "Configure the Docker client"
+for Docker 17.07 and higher in "Configure Docker to use a proxy server" at
 https://docs.docker.com/network/proxy/#configure-the-docker-client
 
 # Reference-level explanation
@@ -108,7 +72,7 @@ All Docker files must be updated to conform as follows:
 * `curl` requires no changes, but it is not usually installed. It needs to be
   installed for containers that use it. For example,
   `RUN apt-get update && apt-get install -yq curl `
-
+* Package `gnupg2` is required by `apt-key` and should be installed.
 * `apt-key` : Instead of using `apt-key adv` to download an apt signing key,
   use `curl` and `apt-key add -` . For example, instead of the following in a
   `Dockerfile` (which no longer works):
@@ -125,7 +89,7 @@ two keyservers for robustness:
 
 ```
 RUN \
- apt-get update && apt-get install -yq curl && curl --retry 3 -sSL \
+ apt-get update && apt-get install -yq curl gnupg2 && curl --retry 3 -sSL \
     'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8AA7AF1F1091A5FD' \
     | apt-key add - 
 ```
