@@ -30,13 +30,17 @@ and it is desirable that the Sawtooth repositories standardize on a single
 approach. The challenge is further complicated by different abilities and
 constraints of different versions of Docker and Ubuntu.
 
-Starting with Ubuntu 18 (Bionic), `gpg` , invoked through `apt-key adv` ,
+Starting with Ubuntu 18 (Bionic), `gpg` 2.2 , invoked through `apt-key adv` ,
 now ignores `http_proxy` and `https_proxy` environment variables, and ignores
 the command line options
 `apt-key adv --keyserver-options http-proxy=<proxy server url>`
 and `https-proxy=<proxy server url>` . The only method remaining is with
 cumbersome apt command-specific configuration file settings in
 `/etc/apt/apt.conf.d/proxy` .
+
+Details are here:
+https://bugs.launchpad.net/ubuntu/+source/gnupg2/+bug/1788190
+
 
 
 # Goals
@@ -92,6 +96,10 @@ actual contents are site specific:
 }
 ````
 
+For more detail, see the section "Configure the Docker client" for Docker 17.07
+and higher in "Configure Docker to use a proxy server" 
+https://docs.docker.com/network/proxy/#configure-the-docker-client
+
 # Reference-level explanation
 [reference-level-explanation]: #reference-level-explanation
 
@@ -118,18 +126,10 @@ two keyservers for robustness:
 
 ```
 RUN \
- apt-get update && apt-get install -yq curl && \
- (curl --retry 3 -sSL \
-  'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8AA7AF1F1091A5FD' \
-  | apt-key add - || curl --retry 3 -sSL \
-  'http://p80.pool.sks-keyservers.net/pks/lookup?op=get&search=0x8AA7AF1F1091A5FD' \
-  | apt-key add -)
+ apt-get update && apt-get install -yq curl && curl --retry 3 -sSL \
+    'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8AA7AF1F1091A5FD' \
+    | apt-key add - 
 ```
-
-For more detail, see the section "Configure the Docker client" for Docker 17.07
-and higher in "Configure Docker to use a proxy server" at
-https://docs.docker.com/network/proxy/#configure-the-docker-client
-
 
 # Conclusion
 [conclusion]: #conclusion
