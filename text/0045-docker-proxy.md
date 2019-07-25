@@ -38,9 +38,8 @@ and `https-proxy=<proxy server url>` . The only method remaining is with
 cumbersome apt command-specific configuration file settings in
 `/etc/apt/apt.conf.d/proxy` .
 
-Details are here:
-https://bugs.launchpad.net/ubuntu/+source/gnupg2/+bug/1788190
-
+For information on options ignored by GnuPG since 2.1, see:
+https://www.gnupg.org/documentation/manuals/gnupg/GPG-Configuration-Options.html
 
 
 # Goals
