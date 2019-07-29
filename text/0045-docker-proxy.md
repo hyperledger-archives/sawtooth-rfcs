@@ -84,8 +84,9 @@ RUN \
 ```
 
 Use the following, which works in proxy and non-proxy environments.
-Although not proxy-related, this example also has retry logic and uses
-two keyservers for robustness:
+Although not proxy-related, this example also has retry logic and
+installs packages `curl` and `gnupg2` which are not in a minimized
+Docker image.
 
 ```
 RUN apt-get update && apt-get install -yq curl gnupg2
