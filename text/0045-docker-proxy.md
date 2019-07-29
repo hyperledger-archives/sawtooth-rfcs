@@ -88,8 +88,9 @@ Although not proxy-related, this example also has retry logic and uses
 two keyservers for robustness:
 
 ```
-RUN \
- apt-get update && apt-get install -yq curl gnupg2 && curl --retry 3 -sSL \
+RUN apt-get update && apt-get install -yq curl gnupg2
+
+RUN curl --retry 3 -sSL \
     'http://keyserver.ubuntu.com/pks/lookup?op=get&search=0x8AA7AF1F1091A5FD' \
     | apt-key add - 
 ```
