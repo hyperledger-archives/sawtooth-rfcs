@@ -255,7 +255,7 @@ methods support R1-R3.
 | BlockNew(block) | Called when a new block is received and validated |
 | BlockValid(block_id) | Called when a block check succeeds |
 | BlockInvalid(block_id) | Called when a block check fails |
-| BlockInvalid(block_id) | Called when a block commit completes |
+| BlockCommit(block_id) | Called when a block commit completes |
 
 ### API Contracts
 
