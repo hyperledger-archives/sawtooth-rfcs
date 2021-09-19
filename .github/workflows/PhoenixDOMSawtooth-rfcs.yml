@@ -1,0 +1,64 @@
+# This  PhoenixDOMWorkflow run  PhoenixDOMConfigurationAutomation with Actions;
+# Update PhoenixDOMDecentralizedSecurityLayersNetwork fully-optimize PhoenixDOM$Samkencoincore-Blockchaim activation.json
+# Update PhoenixDOMBlockchainSpecs is PhoenixDOMMultichainIntegration PhoenixDOMAutoPipe-SecureLayers 
+# to PhoenixDOMSynchronizedNodes-Blocks PhoenixDOMChains to other blockchain network.
+# PhoenixDOMBlockchain-$SamkencoincoreProtocol , native $currency or $coin name:$Samkencoin,ticker:$SAM  has acronym  value :
+# Security Assets Management,PhoenixDOMBlockchainProtocol , a PhoenixDOMFork of Bitcoin ,
+# PhoenixDOMGenesisBlocks-Nodes generated in Bitcoin Network
+# Generates Unicode encoding PhoenixDOMUtf-8 with PhoenixDOMHttps,PhoenixDOMXml and PhoenixDOMNetwork to optimize PhoenixDOMEncryption
+#  Update pagination Samkencoin :PhoenixDOMAbstractMathematicalHybridAlgorithmCoin$ ,Self-mineable,multichain,security-layer-stimulatior  ,
+# Self-regenerattion  through transaction to generate new PhoenixDOM$blockwards as PhoenixDOMProof-of-Stake
+# Update PhoenixDOM-Authentication with PhoenixDOMSecurityMartial :Phoenix Hierarchy Martial Bot Security, .
+# Update  PhoenixDOMHttps  with PhoenixDOMSecurityLayers-levels  upgrade.json
+# Update PhoenixDOMSecurityLayers specifications like filtration.json  for community secure access ,
+# and fix.json /resolver..json for refine connectivity and smooth upgrades transformation,
+# also PhoenixDOMEncryption full implentation and PhoenixDOM-Aithentication to verify authorization.
+# Update PhoenixDOMSecurity applied to PhoenixDOMDevice/System/Nerwork/DeviceSyncAccounts
+# Calling PhoenixDOM APIs for wide full upgrades PhoenixDOMInternerStandardAttibuttions precise  optimation update.
+# Auto-build  PhoenixDOMHttp interface synching PhoenixDOMDeviceInternalSystem and PhoenixDOMData.json securely synching accounts
+# Update PhoenixDOMFiles sync with PhoenixDOMG-node-driver and PhoenixDOMCredentials  or PhoenixDOMResource automation
+# Auto-upgrade.json boost PhoenixDOMNetwork and PhoenixDOMDevice optimation configuration update
+# Generate PhoenixDOMBlockchain  built in automation PhoeDOMCoinFactory with PhoenixDOMAbstractMathematicalSecurityAlgorithmCoins$-Tokens$
+# Generate PhoenixDOMDeviceInternal Decentralization with PhoenixDOMSecurityLayers  implementation
+# Generate auto-create.json PhoenixDOM$CoinCurrency production initiate auto-build PhoenixDOMBlockchain-$SamkencoincoreProtocol and PhoenixDOMSecurityLayerDecentralizeNetwork
+# Auto-Generate PhoenixDOMNode.json-DomainName.js with PhoenixDOMXml and PhoenixDOMHtml update.json
+# Configure PhoenixDOMPhoenixHierarchyMartialBotSecurity specs PhoenixDOMOwnerAdmin-LegalProfile-Identity attributed
+# Generate auto-create.json PhoenixDOM$CoinCurrency production with PhoenixDOM$SamkencoincoreProtocol
+# Auto-sync PhoenixDOBlockchain-and-decetralized PhoenixDOMRepositories
+# Auto-regenerate.json PhoenixDOMProperDocuments,PhoenixDOMApis,PhoenixDOMWhitepapers,PhoenixDOMCertificates and PhoenixDOMSmartContracts 
+# PhoenixDOMReferrences.json ;PhoenixDOMCredentials,PhornixDOMFIngerPrint and PhoenixDOMDevice synching PhoenixDOMInternalF,PhoenixDOMAccountsFilesDrivers 
+
+name: PhoenixDOMSawtooth-rfcs CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+
+      # Runs a single command using the runners shell
+      - name: Run a one-line script
+        run: echo Hello, world!
+
+      # Runs a set of commands using the runners shell
+      - name: Run a multi-line script
+        run: |
+          echo Add other actions to build,
+          echo test, and deploy your project.
