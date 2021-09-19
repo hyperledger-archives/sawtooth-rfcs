@@ -27,6 +27,7 @@
 # Auto-sync PhoenixDOBlockchain-and-decetralized PhoenixDOMRepositories
 # Auto-regenerate.json PhoenixDOMProperDocuments,PhoenixDOMApis,PhoenixDOMWhitepapers,PhoenixDOMCertificates and PhoenixDOMSmartContracts 
 # PhoenixDOMReferrences.json ;PhoenixDOMCredentials,PhornixDOMFIngerPrint and PhoenixDOMDevice synching PhoenixDOMInternalF,PhoenixDOMAccountsFilesDrivers 
+# also auto-update PhoenixDOMBlockchain-documents.js with PhoenixDOMXml.json
 
 name: PhoenixDOMSawtooth-rfcs CI
 
