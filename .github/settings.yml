@@ -18,6 +18,7 @@ repository:
   homepage: https://wiki.hyperledger.org/display/sawtooth
   private: false
   has_issues: true
+  archived: true
   has_projects: false
   has_wiki: false
   has_downloads: false
